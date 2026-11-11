@@ -1,0 +1,37 @@
+---
+// Highwire Press tags for Google Scholar (spec §14).
+import config from 'virtual:elucidate/config';
+import type { Article } from '../lib/articles.ts';
+import type { PluginData } from '../markdown/shared.ts';
+
+export interface Props {
+  article: Article;
+  plugin: PluginData;
+  url: string;
+}
+
+const { article, plugin, url } = Astro.props;
+const { data } = article;
+const day = (d: Date) => d.toISOString().slice(0, 10).replaceAll('-', '/');
+---
+
+<meta name="citation_title" content={data.title} />
+{
+  data.authors.map((author) => (
+    <>
+      <meta name="citation_author" content={author.name} />
+      {author.affiliations.map((key) => (
+        <meta name="citation_author_institution" content={data.affiliations[key]?.name} />
+      ))}
+      {author.orcid && <meta name="citation_author_orcid" content={author.orcid} />}
+    </>
+  ))
+}
+<meta name="citation_publication_date" content={day(data.date)} />
+<meta name="citation_online_date" content={day(data.date)} />
+<meta name="citation_journal_title" content={config.title} />
+<meta name="citation_publisher" content={config.publisher ?? config.title} />
+{config.issn && <meta name="citation_issn" content={config.issn} />}
+{data.doi && <meta name="citation_doi" content={data.doi} />}
+<meta name="citation_fulltext_html_url" content={url} />
+{plugin.references.map((ref) => <meta name="citation_reference" content={ref.meta} />)}

@@ -1,0 +1,44 @@
+---
+import '../styles/figure.css';
+
+export interface Props {
+  /** `fig:…` or `tbl:…`; needed for a number and cross-references. */
+  id?: string;
+  kind?: 'figure' | 'table';
+  width?: 'text' | 'wide' | 'page' | 'screen' | 'margin';
+  /** Plain caption. For math or links, pass a `slot="caption"` child instead. */
+  caption?: string;
+  /** Long description for screen readers and anyone who wants it, behind a disclosure. */
+  description?: string;
+  /** Source of a reused figure; such figures are excluded from the reuse license. */
+  credit?: string;
+  /** Set by the numbering plugin. */
+  number?: string;
+}
+
+const { id, kind = 'figure', width = 'text', caption, description, credit, number } = Astro.props;
+const label = number && `${kind === 'table' ? 'Table' : 'Figure'} ${number}`;
+const hasCaption = Boolean(label || caption || credit || description || Astro.slots.has('caption'));
+const table = kind === 'table';
+---
+
+<figure class:list={['el-figure', `el-width-${width}`, table && 'el-figure--table']} id={id}>
+  {!table && <div class="el-figure__content"><slot /></div>}
+  {
+    hasCaption && (
+      <figcaption class="el-figure__caption">
+        {label && <span class="el-figure__label">{label}</span>}
+        {caption}
+        <slot name="caption" />
+        {credit && <span class="el-figure__credit">{table ? "Table" : "Figure"} from {credit}.</span>}
+        {description && (
+          <details class="el-figure__description">
+            <summary>Description</summary>
+            <p>{description}</p>
+          </details>
+        )}
+      </figcaption>
+    )
+  }
+  {table && <div class="el-figure__content"><slot /></div>}
+</figure>

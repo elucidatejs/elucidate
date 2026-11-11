@@ -34,22 +34,22 @@ fonts, so you don't set those yourself.
 | `url` | required | Full public URL with protocol. A path (`/lab-notes`) becomes the base path, and all internal links include it. |
 | `description` | `''` | Intro on the article index and default meta description. |
 | `logo` | none | Path of an image in `public/` (e.g. `'/logo.svg'`) shown instead of the title as wordmark. |
-| `publisher` | `title` | Publisher name in the footer (and later the citation box). |
-| `issn` | none | ISSN, for scholarly metadata. |
+| `publisher` | `title` | Publisher name in the footer and the scholarly meta tags. |
+| `issn` | none | ISSN, for the scholarly meta tags. |
 | `nav` | `[{ label: 'Research', href: '/' }]` | Header and footer links. Paths starting with `/` get the base path. |
 | `home` | `'index'` | `'index'`: the article index is the homepage. `'page'`: `src/pages/index.mdx` (or `.astro`) is the homepage and the index moves to `/<routes.articles>/`. |
 | `routes.articles` | `'research'` | URL segment for articles: `/research/<slug>/`, tags at `/research/tag/<tag>/`. |
 | `license` | `'CC-BY-4.0'` | Default content license; articles can override it. |
-| `repository` | none | Repository URL, for "Updates and corrections" links. |
-| `math.engine` | `'katex'` | `'katex'` or `'mathjax'`. |
-| `math.macros` | `{}` | TeX macros shared by both engines, e.g. `{ '\\R': '\\mathbb{R}' }`. |
-| `numbering.sections` | `false` | Number sections in headings and the table of contents. |
+| `repository` | none | Repository URL, for the change history and "report a correction" links in the appendix. If the site is in a subfolder or uses another branch, give the tree URL, e.g. `https://github.com/me/notes/tree/main/site`. |
+| `math.engine` | `'katex'` | `'katex'` or `'mathjax'`. MathJax needs `npm install @mathjax/src`; it renders SVG, so pages need no math fonts. |
+| `math.macros` | `{}` | TeX macros shared by both engines, e.g. `{ '\\R': '\\mathbb{R}', '\\norm': '\\left\\lVert #1 \\right\\rVert' }`. |
+| `numbering.sections` | `false` | Number sections (1, 1.1, …) in headings, the table of contents and cross-references. |
 | `index.thumbnails` | `false` | Show a small thumbnail in the index for articles with an image hero. |
 | `showcase` | `'dev'` | Component overview page: `'dev'`, `'public'` or `'off'`. |
 | `overrides` | `{}` | Replace structural components, e.g. `{ Byline: './src/overrides/Byline.astro' }`. |
 
-During v0.1 development, `repository`, `issn`, `math`, `numbering`, `showcase` and `overrides` are
-validated but take effect in later milestones (see the "v0.1 tracking" issue).
+During v0.1 development, `showcase` and `overrides` are validated but take effect in later
+milestones (see the "v0.1 tracking" issue).
 
 ## Errors
 

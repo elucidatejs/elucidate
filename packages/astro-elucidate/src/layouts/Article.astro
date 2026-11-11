@@ -1,23 +1,34 @@
 ---
 import '../styles/article.css';
 import '../styles/toc.css';
-import type { MarkdownHeading } from 'astro';
+import '../styles/scholarly.css';
+import { getImage } from 'astro:assets';
 import Abstract from '../components/Abstract.astro';
+import Appendix from '../components/Appendix.astro';
 import ArticleHero from '../components/ArticleHero.astro';
+import ArticleMeta from '../components/ArticleMeta.astro';
 import Byline from '../components/Byline.astro';
+import HoverCards from '../components/HoverCards.astro';
+import MathStyles from '../components/MathStyles.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import type { Article } from '../lib/articles.ts';
 import type { Hero } from '../lib/heroes.ts';
+import type { PluginData } from '../markdown/shared.ts';
 import Base from './Base.astro';
 
 export interface Props {
   article: Article;
-  headings: MarkdownHeading[];
+  /** What the Markdown plugins exported: headings, references, footnotes, `hasMath`. */
+  plugin: PluginData;
   hero?: Hero | undefined;
 }
 
-const { article, headings, hero } = Astro.props;
+const { article, plugin, hero } = Astro.props;
 const { data } = article;
+const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const image =
+  hero?.image &&
+  new URL((await getImage({ src: hero.image, width: 1200, format: 'png' })).src, url).href;
 const banner = {
   draft: 'Draft: visible in development only, not built for production.',
   review: 'In review: not listed or indexed. Share this link with reviewers.',
@@ -25,13 +36,21 @@ const banner = {
 }[data.status];
 ---
 
-<Base title={data.title} description={data.description} noindex={data.status === 'review'}>
+<Base
+  title={data.title}
+  description={data.description}
+  noindex={data.status === 'review'}
+  ogType="article"
+  image={image}
+>
+  <ArticleMeta slot="head" article={article} plugin={plugin} url={url} />
+  {plugin.hasMath && <MathStyles slot="head" />}
   <article class="el-article">
     <header class="el-title-block el-grid">
       {banner && <p class="el-status el-label" role="note">{banner}</p>}
       <ArticleHero article={article} hero={hero} />
       <Byline article={article} />
-      {data.toc && <TableOfContents headings={headings} variant="disclosure" />}
+      {data.toc && <TableOfContents headings={plugin.headings} variant="disclosure" />}
     </header>
     {
       data.abstract && (
@@ -41,8 +60,10 @@ const banner = {
       )
     }
     <div class="el-prose el-grid">
-      {data.toc && <TableOfContents headings={headings} variant="float" />}
+      {data.toc && <TableOfContents headings={plugin.headings} variant="float" />}
       <slot />
     </div>
+    <Appendix article={article} plugin={plugin} url={url} />
   </article>
+  {(plugin.references.length > 0 || plugin.footnotes.length > 0) && <HoverCards />}
 </Base>

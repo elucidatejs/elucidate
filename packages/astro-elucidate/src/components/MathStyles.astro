@@ -1,0 +1,7 @@
+---
+// Rendered only on pages with math, so other pages load no math CSS (spec §6.5).
+import styles from 'virtual:elucidate/math-styles';
+---
+
+{styles.href && <link rel="stylesheet" href={styles.href} />}
+{styles.css && <style is:inline set:html={styles.css} />}

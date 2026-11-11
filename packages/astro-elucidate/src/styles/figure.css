@@ -1,0 +1,75 @@
+/* <Figure>: content, numbered caption, description disclosure. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-figure {
+    margin-block: var(--el-space-6);
+  }
+  .el-prose > .el-figure {
+    margin-block: var(--el-space-6);
+  }
+  .el-figure__content :where(img, svg, video, canvas) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .el-figure__content :where(table) {
+    width: 100%;
+    display: table;
+  }
+  .el-figure__caption {
+    max-width: var(--el-width-text);
+    margin-block-start: var(--el-space-3);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    line-height: 1.5;
+    color: var(--el-text-muted);
+  }
+  .el-figure--table .el-figure__caption {
+    margin-block: 0 var(--el-space-3);
+  }
+  .el-figure__label {
+    margin-inline-end: 0.6em;
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--el-text);
+  }
+  .el-figure__credit {
+    margin-inline-start: 0.3em;
+  }
+  .el-figure__description {
+    margin-block-start: var(--el-space-2);
+  }
+  .el-figure__description summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    cursor: pointer;
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .el-figure__description p {
+    margin-block-start: var(--el-space-2);
+  }
+
+  /* Wide figures run edge to edge on phones; their captions keep the side padding. */
+  @media (max-width: 639px) {
+    .el-figure:is(.el-width-wide, .el-width-page, .el-width-screen) .el-figure__caption {
+      padding-inline: var(--el-gutter);
+    }
+  }
+
+  /* width="margin": beside the text on wide screens, in the text column otherwise. */
+  @media (min-width: 1280px) {
+    .el-width-margin.el-figure {
+      float: right;
+      clear: right;
+      width: var(--el-width-margin);
+      margin: 0 calc(-1 * var(--el-width-margin) - var(--el-space-5)) var(--el-space-4) 0;
+    }
+  }
+}

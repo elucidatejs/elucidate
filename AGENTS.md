@@ -12,7 +12,8 @@ packages/astro-elucidate/   the engine: Astro integration (ships TypeScript sour
   src/index.ts              integration: settings, Markdown, fonts, virtual modules, routes
   src/{config.ts,schema/}   config and front-matter schemas, fix-it error formatting
   src/{routes,layouts,components}/  injected pages, layouts, structural components
-  src/{lib,markdown,client,styles}/ shared helpers, remark plugins, client scripts, layered CSS
+  src/{lib,markdown,client,styles}/ shared helpers, remark/rehype plugins, client scripts, layered CSS
+  test/fixtures/            articles and .bib files for the plugin tests
 packages/create-elucidate/  `npm create elucidate` (compiled to dist/ with tsc)
 starter/                    the site template = demo site = e2e target (example articles in src/articles/)
 e2e/                        Playwright + axe tests against the built starter

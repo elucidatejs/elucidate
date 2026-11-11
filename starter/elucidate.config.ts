@@ -8,5 +8,9 @@ export default defineConfig({
     { label: 'Research', href: '/' },
     { label: 'About', href: '/about/' },
   ],
-  repository: 'https://github.com/elucidatejs/elucidate',
+  // The starter lives in a subfolder of the engine repository; a repository root works too.
+  repository: 'https://github.com/elucidatejs/elucidate/tree/main/starter',
+  math: {
+    macros: { '\\R': '\\mathbb{R}', '\\norm': '\\left\\lVert #1 \\right\\rVert' },
+  },
 });

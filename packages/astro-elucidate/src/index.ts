@@ -11,7 +11,8 @@ import {
   siteAndBase,
 } from './config.ts';
 import { shikiConfig } from './markdown/code-theme.ts';
-import { remarkDefaultLayout } from './markdown/default-layout.ts';
+import { markdownPlugins } from './markdown/index.ts';
+import { mathStylesModule } from './markdown/math-engines.ts';
 
 export type { ElucidateConfig, ElucidateUserConfig } from './config.ts';
 
@@ -32,14 +33,7 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
         updateConfig({
           ...siteAndBase(config.url),
           markdown: {
-            processor: unified({
-              remarkPlugins: [
-                [
-                  remarkDefaultLayout,
-                  { pagesDir: fileURLToPath(pages), layout: 'astro-elucidate/layouts/Page.astro' },
-                ],
-              ],
-            }),
+            processor: unified(markdownPlugins(config, fileURLToPath(pages))),
             shikiConfig,
           },
           integrations: astro.integrations.some((i) => i.name === '@astrojs/mdx') ? [] : [mdx()],
@@ -98,17 +92,17 @@ function checkHome(config: ElucidateConfig, indexPage: string | undefined): void
   }
 }
 
-/** Exposes the validated config and the optional user stylesheet as virtual modules. */
+/** Exposes the validated config, the optional user stylesheet and math styles as virtual modules. */
 function virtualModules(config: ElucidateConfig, themeCss: URL) {
-  const modules: Record<string, string> = {
-    'virtual:elucidate/config': `export default ${JSON.stringify(config)};`,
-    'virtual:elucidate/user-styles': existsSync(themeCss)
-      ? `import ${JSON.stringify(fileURLToPath(themeCss))};`
-      : '',
+  const modules: Record<string, () => string | Promise<string>> = {
+    'virtual:elucidate/config': () => `export default ${JSON.stringify(config)};`,
+    'virtual:elucidate/user-styles': () =>
+      existsSync(themeCss) ? `import ${JSON.stringify(fileURLToPath(themeCss))};` : '',
+    'virtual:elucidate/math-styles': () => mathStylesModule(config.math.engine, config.math.macros),
   };
   return {
     name: 'astro-elucidate:virtual-modules',
     resolveId: (id: string) => (id in modules ? `\0${id}` : undefined),
-    load: (id: string) => (id.startsWith('\0') ? modules[id.slice(1)] : undefined),
+    load: (id: string) => (id.startsWith('\0') ? modules[id.slice(1)]?.() : undefined),
   };
 }
