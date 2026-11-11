@@ -121,8 +121,12 @@ header: false   # leaves out the site header too
 ## 8. Pages and routes
 
 Add pages in `src/pages/`; Markdown and MDX pages get the Page layout. Change the article URL
-segment with `routes.articles`, and choose what the homepage shows with `home`. A page of your own
-at `src/pages/components.astro` takes the place of the component overview.
+segment with `routes.articles`, and choose what the homepage shows with `home`: with `'page'`, your
+`src/pages/index.mdx` is the homepage and can show the latest articles with `<ArticleList />`
+([writing.md](writing.md#a-homepage-of-your-own)). A page of your own at
+`src/pages/components.astro` takes the place of the component overview, and files such as
+`public/robots.txt` take the place of the generated ones
+([configuration.md](configuration.md#generated-files)).
 
 ## 9. Astro itself
 

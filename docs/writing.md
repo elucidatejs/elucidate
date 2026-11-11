@@ -5,6 +5,11 @@ is the URL slug, and the front matter at the top of the file drives the title bl
 index entry. The example article `a-tour-of-elucidate` in the starter shows every feature and is
 meant to be copied from.
 
+Start one with `npm run new -- "Article title"`: it creates `src/articles/<slug>/index.mdx` with
+valid front matter and `status: draft`, and prints the URL to preview it at. Before publishing,
+`npm run check` finds what a build would reject (settings, front matter, unknown labels and
+citations, TeX and MDX errors, and type errors) and says where.
+
 ## Folder layout
 
 ```
@@ -68,7 +73,9 @@ src/articles/gnn/index.mdx → authors[0].orcid
 
 ## Text and sections
 
-Standard Markdown with GitHub extensions: tables, footnotes, strikethrough and task lists. `##`
+Standard Markdown with GitHub extensions: tables, footnotes, strikethrough and task lists. Link to
+other pages of the site with root paths, such as `[About](/about/)`; when the site lives under a
+path (`url: 'https://ada.github.io/notes'`), Elucidate adds it (`/notes/about/`). `##`
 starts a section and `###` a subsection; `#` is reserved for the title. Sections appear in the
 table of contents, numbered `01`, `02`, … with subsections nested under them. The contents float
 in the left margin on screens 1280 px and wider and fold into a "Contents" disclosure under the
@@ -267,4 +274,23 @@ title, the same prose typography as articles, and the footer. They accept `title
 import { Page } from 'astro-elucidate/layouts';
 ---
 <Page title="Team">…</Page>
+```
+
+### A homepage of your own
+
+With `home: 'page'` in `elucidate.config.ts`, `src/pages/index.mdx` (or `.astro`) is the homepage
+and the article index moves to `/<routes.articles>/`, titled by the menu item that links to it.
+`<ArticleList />` shows the latest articles anywhere, in the same rows as the index:
+
+```mdx
+---
+title: Lab Notes
+description: What we are working on.
+---
+
+We study how graphs learn. The latest:
+
+<ArticleList limit={3} />
+
+[All articles](/research/)
 ```
