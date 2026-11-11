@@ -185,7 +185,8 @@ redraw when the reader switches themes:
 ```ts
 import { onThemeChange, palette } from 'astro-elucidate/palette';
 
-let colors = palette(); // colors.categorical[0], colors.sequential(0.5), colors.grid, …
+// colors.categorical[0], colors.sequential(0.5), colors.grid, …
+let colors = palette();
 onThemeChange(() => {
   colors = palette();
   draw();
