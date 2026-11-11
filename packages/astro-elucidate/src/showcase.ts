@@ -13,6 +13,8 @@ const descriptions: Record<string, string> = {
   Acknowledgments: 'The first section of the appendix.',
   Contributions: 'Who did what; the second section of the appendix.',
   AppendixSection: 'Supplementary sections, after the author contributions.',
+  ArticleList:
+    'The rows of the article index, newest first, anywhere: on a homepage of your own, say.',
   Controls:
     'Not a component: the classes el-slider, el-segmented and el-toggle style the controls of interactive figures.',
 };

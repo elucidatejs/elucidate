@@ -52,16 +52,18 @@ const banner = {
       <Byline article={article} />
       {data.toc && <TableOfContents headings={plugin.headings} variant="disclosure" />}
     </header>
-    {
-      data.abstract && (
-        <div class="el-grid">
-          <Abstract abstract={data.abstract} />
-        </div>
-      )
-    }
-    <div class="el-prose el-grid">
+    <div class="el-article__body">
       {data.toc && <TableOfContents headings={plugin.headings} variant="float" />}
-      <slot />
+      {
+        data.abstract && (
+          <div class="el-grid">
+            <Abstract abstract={data.abstract} />
+          </div>
+        )
+      }
+      <div class="el-prose el-grid">
+        <slot />
+      </div>
     </div>
     <Appendix article={article} plugin={plugin} url={url} />
   </article>

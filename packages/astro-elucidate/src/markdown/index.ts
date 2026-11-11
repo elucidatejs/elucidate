@@ -1,7 +1,8 @@
 import type { RehypePlugins, RemarkPlugins } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
-import type { ElucidateConfig } from '../config.ts';
+import { type ElucidateConfig, siteAndBase } from '../config.ts';
 import { builtInComponents, remarkAutoImport } from './auto-import.ts';
+import { rehypeBaseLinks } from './base-links.ts';
 import { remarkCitations } from './citations.ts';
 import { remarkCrossref } from './crossref.ts';
 import { remarkDefaultLayout } from './default-layout.ts';
@@ -27,6 +28,7 @@ import { remarkNumbering } from './numbering.ts';
  * 1. math renders equations, so footnotes and sidenotes below contain rendered math.
  * 2. footnotes moves notes to the appendix data and beside their references.
  * 3. images checks alt text and sets lazy loading.
+ * 4. base-links puts the site's base path in front of root paths such as `/about/`.
  */
 export function markdownPlugins(
   config: ElucidateConfig,
@@ -53,6 +55,11 @@ export function markdownPlugins(
         },
       ],
     ],
-    rehypePlugins: [[rehypeMath, config.math], rehypeFootnotes, rehypeImages],
+    rehypePlugins: [
+      [rehypeMath, config.math],
+      rehypeFootnotes,
+      rehypeImages,
+      [rehypeBaseLinks, { base: siteAndBase(config.url).base }],
+    ],
   };
 }

@@ -1,8 +1,8 @@
 ---
 import config from 'virtual:elucidate/config';
-import { listedArticles, listedTags } from '../lib/articles.ts';
-import { indexPath, tagPath } from '../lib/paths.ts';
-import ArticleCard from './ArticleCard.astro';
+import { listedTags } from '../lib/articles.ts';
+import { indexPath, indexTitle, tagPath } from '../lib/paths.ts';
+import ArticleList from './ArticleList.astro';
 
 interface Props {
   /** Only list articles with this tag. */
@@ -10,14 +10,15 @@ interface Props {
 }
 
 const { tag } = Astro.props;
-const articles = await listedArticles(tag);
 const tags = await listedTags();
+const title = indexTitle();
+const intro = config.home === 'index' ? config.description : '';
 ---
 
 <section class="el-index">
   <div class="el-title-block el-grid">
-    <h1 class="el-title">{config.title}</h1>
-    {config.description && <p class="el-index__intro">{config.description}</p>}
+    <h1 class="el-title">{title}</h1>
+    {intro && <p class="el-index__intro">{intro}</p>}
     {
       tags.length > 0 && (
         <nav class="el-tags" aria-label="Filter by tag">
@@ -40,16 +41,6 @@ const tags = await listedTags();
     }
   </div>
   <div class="el-grid">
-    {
-      articles.length > 0 ? (
-        <ol class="el-cards">
-          {articles.map((article) => (
-            <ArticleCard article={article} />
-          ))}
-        </ol>
-      ) : (
-        <p class="el-empty">No published articles yet.</p>
-      )
-    }
+    <ArticleList tag={tag} />
   </div>
 </section>

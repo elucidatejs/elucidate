@@ -13,8 +13,12 @@ the pieces fit, why each dependency exists, and where the implementation deviate
   and scripts as plain files and avoids a bundler.
 - **`create-elucidate`** is a Node CLI, so it is compiled to `dist/` with `tsc`. Node does not
   strip types inside `node_modules`.
-- **`starter/`** depends on `astro-elucidate` through `workspace:*`; `create-elucidate` will rewrite
+- **`starter/`** depends on `astro-elucidate` through `workspace:*`; `create-elucidate` rewrites
   that to the published version (spec §15).
+- **The `elucidate` command** (`bin/elucidate.js`) is the one plain JavaScript file of the engine.
+  It finds Vite through the site's own `astro` and loads `src/cli/index.ts` with Vite's
+  `runnerImport`, the way Astro loads its config, so the CLI is TypeScript like the rest and needs
+  no build step. The same loader reads the site's `elucidate.config.ts`.
 
 ## Engine layout
 
@@ -27,10 +31,12 @@ the pieces fit, why each dependency exists, and where the implementation deviate
 | `palette.ts`, `types.ts` | `astro-elucidate/palette` (the data palette for scripts) and `astro-elucidate/types` (props of the overridable components). |
 | `config.ts`, `schema/` | Zod schemas for `elucidate.config.ts` and front matter, and the `file → path` error formatter with "Did you mean" hints. |
 | `content.ts` | The `articles` collection (one folder per article; the folder name is the slug). |
-| `routes/` | Injected pages: index, article, tag, 404, and the component overview. |
+| `routes/` | Injected pages: index, article, tag, 404, the component overview, and the `rss.xml`, `llms.txt` and `robots.txt` endpoints. |
+| `sitemap.ts` | `@astrojs/sitemap` with articles in review, `/components/` and non-page files filtered out. |
+| `cli/` | `elucidate new` and `elucidate check` (§15), loaded by `bin/elucidate.js`. |
 | `layouts/` | `Base` (head, header, footer), `Article`, `Bespoke`, `Page`. |
 | `components/` | Structural components (Header, Byline, TableOfContents, Appendix, …), the author-facing ones exported from `astro-elucidate/components` (Figure, Block, Aside, Note, Button, Overlay, Acknowledgments, Contributions, AppendixSection), `blocks/` for bespoke articles, and `examples/` for the overview page. |
-| `lib/` | Plain functions the routes share: article lists and status, URLs with the base path, dates, hero lookup, citation text and BibTeX, license and repository links. |
+| `lib/` | Plain functions the routes share: article lists and status, URLs with the base path, dates, hero lookup, citation text and BibTeX, license and repository links, and the feed formats. |
 | `markdown/` | The remark and rehype plugins (one file each, order in `index.ts`), the BibTeX loader and reference formatter, the KaTeX/MathJax renderers, and the grayscale code theme. |
 | `styles/` | Cascade-layered CSS: tokens, base, layout grid, chrome, components, article, contents, figures, scholarly text (equations, citations, sidenotes, cards) and the appendix. |
 | `client/` | Client scripts, bundled by Astro: theme toggle, contents scroll-spy, citation and footnote cards, copy buttons, overlays; `index.ts` is `astro-elucidate/client`. |
@@ -60,6 +66,26 @@ Heroes are found with `import.meta.glob` over `src/articles/*/Hero.astro` and `h
   `components/examples/*.example.astro` and the site's `src/components/<Name>.example.mdx` files,
   with their sources as strings.
 
+### Site features and the CLI (M4)
+
+- **Feeds.** `lib/feeds.ts` turns the settings and the listed articles into RSS, `llms.txt` and
+  `robots.txt`; the routes only add the site URL. A site's own `public/<file>` or
+  `src/pages/<file>.ts` wins, checked on the file system like `404`.
+- **Sitemap.** The filter runs when the build is done and reads `status: review` from the articles'
+  front matter then, since the collection is not available to integrations.
+- **`elucidate check`** runs what a build would: the settings, overrides and registry checks of the
+  integration, the article schema, and each article through the same remark and rehype plugins
+  (`markdownPlugins`) with `remark-mdx` and `remark-gfm`, without Astro's syntax highlighting and
+  image steps. If that passes, it runs `astro check` for the types.
+- **`create-elucidate`** downloads `starter/` at the tag `create-elucidate@<its version>` with
+  giget, then rewrites `package.json` (name, `astro-elucidate` range) and four lines of
+  `elucidate.config.ts` (title, url, description, repository). Changesets keeps both packages at
+  the same version (`fixed`), so the tag and the range match.
+- **`pnpm smoke`** packs both packages and takes the whole path a new user takes: `npm exec` the
+  packed `create-elucidate`, `npm install` with the packed engine, `npm run new`, `check` and
+  `build` for a site at `https://ada.github.io/lab-notes`, then serves `dist/` under `/lab-notes/`
+  only, as GitHub Pages does, and follows every link from the homepage. CI runs it.
+
 ## Dependencies
 
 Runtime (`astro-elucidate`; `astro` is a peer dependency):
@@ -75,6 +101,11 @@ Runtime (`astro-elucidate`; `astro` is a peer dependency):
 | `hast-util-from-html`, `hast-util-to-html` | Insert the rendered math into the tree; export footnote HTML to the appendix. Both already come with `@astrojs/markdown-remark`. |
 | `mdast-util-to-string`, `unist-util-visit`, `vfile` | Tree helpers for the plugins; already installed by the unified stack. |
 | `@types/hast`, `@types/mdast`, `@types/unist` | The engine ships TypeScript source, so the types its plugins use are dependencies. All three already come with the packages above. |
+| `@astrojs/sitemap` | `/sitemap-index.xml` (spec §4.2, §10.3). Added only if the site has not added it itself. |
+| `remark-mdx`, `remark-gfm` | `elucidate check` parses MDX and GitHub-flavored Markdown as the build does. Both already come with `@astrojs/mdx` and `@astrojs/markdown-remark`. |
+
+`create-elucidate` depends on `giget` (spec §15), which downloads a folder of a tagged GitHub
+release and has no dependencies of its own.
 
 Optional peer dependency: `@mathjax/src` 4 for `math.engine: 'mathjax'`. It is loaded only when
 selected, with a fix-it error if it is missing, so KaTeX sites don't install it.
@@ -89,7 +120,7 @@ Development (workspace root):
 | `@biomejs/biome` | Lint and format in one fast tool (spec §3). |
 | `typescript` | Strict typechecking. Pinned to 6.x because `@astrojs/check` supports `^5 \|\| ^6` only. |
 | `vitest` | Unit tests for config, schemas and markdown plugins. |
-| `remark-gfm`, `remark-mdx` (engine dev) | Run the plugins on fixtures in tests without Astro. `@mathjax/src` is also a dev dependency, so both math engines are tested. |
+| `@mathjax/src` (engine dev) | Both math engines are tested. |
 | `@playwright/test`, `@axe-core/playwright` | E2E, accessibility checks and `pnpm shots`. |
 | `@changesets/cli` | Versioning and changelogs for the two published packages. |
 | `@types/node` | Types for Node APIs in tests, scripts and the CLI. |
@@ -113,7 +144,13 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 | `--el-font-serif` (§12.2) | A token with a fallback stack; the font is not registered | Registering it would download it on every build for an optional style. `docs/design.md` says how to load it. |
 | Typecheck with `tsc` | `astro check` for `astro-elucidate` too | The engine imports `.astro` files, which `tsc` cannot resolve. |
 | Features by milestone (§18) | The config and front-matter schemas accept every v0.1 field now; fields for later milestones are validated but unused | Sites written today keep working as features land. The docs say which fields take effect later. |
-| `home: 'page'` in M4 (§18) | Route switch and both collision errors in M1 | They fall out of the §20 #6 check; the `ArticleList` component for page mode still comes in M4. |
+| `home: 'page'` in M4 (§18) | Route switch and both collision errors in M1 | They fall out of the §20 #6 check; `ArticleList` came in M4. |
+| Index title with `home: 'page'` (§10.1) | The label of the `nav` item that links to the index, else "Articles"; no intro | The site title and description belong to the homepage then. |
+| "All internal links MUST respect `base`" (§5) | Also Markdown links and images with a root path (`markdown/base-links.ts`); JSX in MDX is left alone | Authors write `/about/` as they would anywhere; a base path should not change their text. |
+| `elucidate check` (§15) | Checks every article, drafts included, and stops at the first error in each; type errors come from `astro check` only when the rest passes | One error per article is what a build shows; running `astro check` first would repeat the front-matter errors. |
+| `create-elucidate` options (§15) | `--title`, `--url` and `--yes` for use without a terminal, and `--template` for a local starter folder | The smoke test and CI need it without prompts, and before the first release there is no tag to download. Without a URL, `https://example.github.io/<folder>` stands in and no repository is set. |
+| Starter README and AGENTS.md (§17.2, §17.3) | Written in M4 | `create-elucidate` copies them into every new site. |
+| Done when: "push → live on GitHub Pages" (§18 M4) | `pnpm smoke` covers everything up to the push, under a project path, on every CI run; the push itself was checked once by hand, on a test repository with a project path | CI cannot create repositories or Pages sites. |
 | `release.yml` (§4.1) | Deferred to M5 | Nothing is published before M5. |
 | Changesets opens the "Version Packages" PR from Actions (§16, §21) | `release.yml` will only publish (`changeset publish` skips versions already on npm); the version bump is a normal PR made with `pnpm changeset version` | The repository setting "Allow GitHub Actions to create and approve pull requests" stays off, so no workflow can open or approve pull requests. |
 | Issue and PR templates (§18 M0) | Not added | They belong in the org-level `elucidatejs/.github` repo (§4.0). |
@@ -164,6 +201,10 @@ Checked on 2026-11-11. Items not listed yet are checked in the milestone that fi
 - **3. Named slots from MDX** (M2): `<Fragment slot="caption">…</Fragment>` as a direct child of
   `<Figure>` in MDX fills `<slot name="caption" />`, with math, citations and cross-references
   inside processed by the plugins. The tour article's table uses it.
+- **Sitemap and the CLI loader** (M4, not a §20 item): `@astrojs/sitemap` 3.7 skips `404`/`500` itself and
+  runs its `filter` on full URLs after the build. Node 22 does not strip types under
+  `node_modules` (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`), hence the CLI's Vite loader;
+  `vite.runnerImport` exists in the Vite 8 that Astro 7.4 uses.
 - **4. Auto-import** (M2): `astro-auto-import` 0.6.0 supports Astro 7 (`peerDependencies: astro
   ^7.2.4`), but it is a separate integration and imports every listed component into every file.
   `markdown/auto-import.ts` is the ~40-line equivalent: it adds one `import` for the built-in

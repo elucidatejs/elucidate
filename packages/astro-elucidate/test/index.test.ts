@@ -34,6 +34,7 @@ function setup(
     config: {
       root: pathToFileURL(`${root}/`),
       srcDir: pathToFileURL(join(root, 'src/')),
+      publicDir: pathToFileURL(join(root, 'public/')),
       integrations: [],
     },
     command,
@@ -54,8 +55,29 @@ describe('astro-elucidate integration', () => {
     });
   });
 
-  it('injects the index, article, tag and 404 routes', () => {
-    expect(setup(config).routes).toEqual(['/', '/research/[slug]', '/research/tag/[tag]', '/404']);
+  it('injects the index, article, tag, 404 and feed routes', () => {
+    expect(setup(config).routes).toEqual([
+      '/',
+      '/research/[slug]',
+      '/research/tag/[tag]',
+      '/404',
+      '/rss.xml',
+      '/llms.txt',
+      '/robots.txt',
+    ]);
+  });
+
+  it("keeps the site's own feeds and robots.txt, in src/pages or public/", () => {
+    const { routes } = setup(config, ['rss.xml.ts'], { files: { 'public/robots.txt': '' } });
+    expect(routes).toContain('/llms.txt');
+    expect(routes).not.toContain('/rss.xml');
+    expect(routes).not.toContain('/robots.txt');
+  });
+
+  it('adds MDX and the sitemap unless the site already has them', () => {
+    const names = (update: Record<string, unknown> | undefined) =>
+      ((update?.integrations ?? []) as { name: string }[]).map((i) => i.name);
+    expect(names(setup(config).update)).toEqual(['@astrojs/mdx', '@astrojs/sitemap']);
   });
 
   it('moves the index under the articles route when home is a page', () => {

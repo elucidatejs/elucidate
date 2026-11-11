@@ -1,4 +1,7 @@
 import config from 'virtual:elucidate/config';
+import { slugify } from './slugify.ts';
+
+export { slugify };
 
 /** Prefixes a site-internal path with Astro's base; leaves external URLs alone. */
 export function withBase(path: string): string {
@@ -20,11 +23,11 @@ export function tagPath(tag: string): string {
   return withBase(`/${config.routes.articles}/tag/${slugify(tag)}/`);
 }
 
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+/**
+ * Title of the article index: the site title when the index is the homepage; otherwise the label
+ * of the menu item that points to it, since the site title then belongs to the homepage.
+ */
+export function indexTitle(): string {
+  if (config.home === 'index') return config.title;
+  return config.nav.find((item) => withBase(item.href) === indexPath())?.label ?? 'Articles';
 }

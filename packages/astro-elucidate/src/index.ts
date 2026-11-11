@@ -17,6 +17,7 @@ import { mathStylesModule } from './markdown/math-engines.ts';
 import { overridesPlugin, resolveOverrides } from './overrides.ts';
 import { bespokeBlocks, type Registry, readRegistry } from './registry.ts';
 import { showcaseModule } from './showcase.ts';
+import { sitemapIntegration } from './sitemap.ts';
 
 export type { ElucidateConfig, ElucidateUserConfig } from './config.ts';
 
@@ -36,6 +37,7 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
         addWatchFile,
       }) => {
         const config = parseConfig(userConfig);
+        const has = (name: string) => astro.integrations.some((i) => i.name === name);
         const pages = new URL('pages/', astro.srcDir);
         const indexPage = findPage(pages, 'index');
         checkHome(config, indexPage);
@@ -50,7 +52,10 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
             processor: unified(markdownPlugins(config, fileURLToPath(pages), registry.names)),
             shikiConfig,
           },
-          integrations: astro.integrations.some((i) => i.name === '@astrojs/mdx') ? [] : [mdx()],
+          integrations: [
+            ...(has('@astrojs/mdx') ? [] : [mdx()]),
+            ...(has('@astrojs/sitemap') ? [] : [sitemapIntegration(config, astro.srcDir)]),
+          ],
           fonts: [
             font('Inter', '--el-font-inter', ['400 600'], ['system-ui', 'sans-serif']),
             font('JetBrains Mono', '--el-font-jetbrains-mono', ['400', '500'], ['monospace']),
@@ -67,6 +72,12 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
         route(`${articles}/[slug]`, 'article.astro');
         route(`${articles}/tag/[tag]`, 'tag.astro');
         if (!findPage(pages, '404')) route('/404', '404.astro');
+        // Feeds and machine-readable files (§10.3), unless the site has its own.
+        for (const file of ['rss.xml', 'llms.txt', 'robots.txt']) {
+          if (!findPage(pages, file) && !existsSync(new URL(file, astro.publicDir))) {
+            route(`/${file}`, `${file}.ts`);
+          }
+        }
         const showcase =
           config.showcase === 'public' || (config.showcase === 'dev' && command === 'dev');
         if (showcase && !findPage(pages, 'components')) route('/components', 'components.astro');

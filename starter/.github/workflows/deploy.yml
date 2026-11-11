@@ -1,0 +1,36 @@
+# Publishes the site on GitHub Pages on every push to main. One-time setup in the repository:
+# Settings → Pages → Source: GitHub Actions. The address, including a project path such as
+# /lab-notes, comes from `url` in elucidate.config.ts.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # Installs with the package manager of the lockfile, builds, and uploads dist/ for Pages.
+      - uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

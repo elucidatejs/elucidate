@@ -43,7 +43,7 @@
     padding-block-start: var(--el-space-7);
   }
   .el-appendix__section + .el-appendix__section,
-  .el-prose:has(> .el-appendix__section:last-child)
+  .el-article__body:has(> .el-prose > .el-appendix__section:last-child)
     + .el-appendix
     > .el-appendix__section:first-child {
     margin-block-start: 0;

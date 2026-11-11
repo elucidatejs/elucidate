@@ -3,5 +3,6 @@
   "baseBranch": "main",
   "access": "public",
   "changelog": "@changesets/cli/changelog",
-  "commit": false
+  "commit": false,
+  "fixed": [["astro-elucidate", "create-elucidate"]]
 }

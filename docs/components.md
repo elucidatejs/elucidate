@@ -12,6 +12,7 @@ page too (it is kept out of search engines).
 - [Overlay](#overlay)
 - [Acknowledgments](#acknowledgments), [Contributions](#contributions),
   [AppendixSection](#appendixsection)
+- [ArticleList](#articlelist)
 - [Controls](#controls) for interactive figures
 - [The data palette](#the-data-palette)
 - [Blocks for a bespoke article](#blocks-for-a-bespoke-article)
@@ -169,6 +170,20 @@ refer to it (`@sec:proofs`).
 ```mdx
 <AppendixSection title="A. Proofs" id="sec:proofs">…</AppendixSection>
 ```
+
+## ArticleList
+
+The rows of the article index (label line, title, description), newest first, anywhere: on a
+homepage of your own (`home: 'page'`), say. It lists published articles only.
+
+```mdx
+<ArticleList limit={3} tag="graphs" />
+```
+
+| Prop    | Default | Meaning                                   |
+| ------- | ------- | ----------------------------------------- |
+| `limit` | all     | Show at most this many articles.          |
+| `tag`   | none    | Only articles with this tag.              |
 
 ## Controls
 

@@ -78,7 +78,7 @@ export function fail(
   subject: string,
   message: string,
 ): never {
-  const path = file.path ? relative(process.cwd(), file.path) : 'Markdown';
+  const path = file.path ? relative(file.cwd, file.path) : 'Markdown';
   const at = place && 'start' in place ? place.start : place;
   const where = at ? `${path}:${at.line}:${at.column}` : path;
   throw new Error(`${where} → ${subject}\n  ${message}`);
@@ -86,6 +86,6 @@ export function fail(
 
 /** Prints a build warning in the same format. */
 export function warn(file: VFile, subject: string, message: string): void {
-  const path = file.path ? relative(process.cwd(), file.path) : 'Markdown';
+  const path = file.path ? relative(file.cwd, file.path) : 'Markdown';
   console.warn(`[elucidate] ${path} → ${subject}\n  ${message}`);
 }

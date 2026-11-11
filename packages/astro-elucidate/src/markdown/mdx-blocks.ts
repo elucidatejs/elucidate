@@ -12,6 +12,7 @@ export const blockComponents = [
   'Acknowledgments',
   'Contributions',
   'AppendixSection',
+  'ArticleList',
 ];
 
 /**

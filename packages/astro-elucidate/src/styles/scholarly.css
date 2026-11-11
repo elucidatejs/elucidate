@@ -74,7 +74,8 @@
     inset: auto;
     margin: 0;
     max-width: min(360px, 100vw - 24px);
-    padding: var(--el-space-4);
+    /* Less above and below than at the sides: the line height adds the rest. */
+    padding: var(--el-space-3) var(--el-space-4);
     border: 1px solid var(--el-border);
     border-radius: var(--el-radius-sm);
     background: var(--el-surface);
@@ -86,8 +87,16 @@
   .el-hovercard > * + * {
     margin-block-start: 0.6em;
   }
+  /* A reference's title on lines of its own, set tighter than the details below it. */
   .el-hovercard .el-ref__title {
+    display: block;
+    width: fit-content;
+    margin-block-end: var(--el-space-1);
     font-weight: 500;
+    line-height: 1.35;
+  }
+  .el-hovercard .el-ref__title + br {
+    display: none;
   }
 }
 

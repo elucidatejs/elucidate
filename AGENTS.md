@@ -13,11 +13,13 @@ packages/astro-elucidate/   the engine: Astro integration (ships TypeScript sour
   src/{config.ts,schema/}   config and front-matter schemas, fix-it error formatting
   src/{routes,layouts,components}/  injected pages, layouts, structural components
   src/{lib,markdown,client,styles}/ shared helpers, remark/rehype plugins, client scripts, layered CSS
-  test/fixtures/            articles and .bib files for the plugin tests
+  src/cli/, bin/            `elucidate new` / `check`; bin/elucidate.js loads the TS through Vite
+  test/fixtures/            articles and .bib files for the plugin tests; site/ is a whole site
 packages/create-elucidate/  `npm create elucidate` (compiled to dist/ with tsc)
 starter/                    the site template = demo site = e2e target (example articles in src/articles/)
 e2e/                        Playwright + axe tests against the built starter
 scripts/shots.ts            screenshot script for visual review (not a test)
+scripts/smoke.ts            create → npm install → new → check → build under a base path, packed
 docs/                       spec.md, architecture.md (deviations live there), topic docs
 ```
 
@@ -27,11 +29,12 @@ docs/                       spec.md, architecture.md (deviations live there), to
 pnpm install
 pnpm dev          # starter dev server against the local packages
 pnpm lint         # Biome (pnpm format to fix)
-pnpm typecheck    # astro check for astro-elucidate and the starter, tsc for create-elucidate
+pnpm typecheck    # astro check for the engine, elucidate check for the starter, tsc for create-elucidate
 pnpm test         # Vitest unit tests
 pnpm build        # builds create-elucidate and the starter
 pnpm e2e          # Playwright + axe; run pnpm build first
 pnpm shots        # screenshots at 375/1440 px, light/dark, into .screenshots/
+pnpm smoke        # a new site from the packed packages, end to end (needs the npm registry)
 ```
 
 First Playwright run on a new machine: `pnpm exec playwright install chromium`.
