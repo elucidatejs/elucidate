@@ -42,9 +42,8 @@ test('wide screens show a numbered floating contents list that follows the reade
   await expect(toc).toBeVisible();
   await expect(page.locator('.el-toc--disclosure')).toBeHidden();
   await expect(toc.locator('.el-toc__number').first()).toHaveText('01');
-  await page.locator('#images').scrollIntoViewIfNeeded();
-  await page.evaluate(() => document.getElementById('images')?.scrollIntoView());
-  await expect(toc.getByRole('link', { name: /Images/ })).toHaveAttribute('aria-current', 'true');
+  await page.evaluate(() => document.getElementById('figures')?.scrollIntoView());
+  await expect(toc.getByRole('link', { name: /Figures/ })).toHaveAttribute('aria-current', 'true');
   await expect(toc.getByRole('link', { name: /The hero/ })).not.toHaveAttribute('aria-current');
 });
 
@@ -54,8 +53,8 @@ test('phones show contents as a disclosure under the byline', async ({ page }) =
   await expect(page.locator('.el-toc--float')).toBeHidden();
   const disclosure = page.locator('.el-toc--disclosure');
   await disclosure.getByText('Contents').click();
-  await disclosure.getByRole('link', { name: /Images/ }).click();
-  await expect(page).toHaveURL(/#images$/);
+  await disclosure.getByRole('link', { name: /Figures/ }).click();
+  await expect(page).toHaveURL(/#figures$/);
   await expect(disclosure).not.toHaveAttribute('open');
 });
 
