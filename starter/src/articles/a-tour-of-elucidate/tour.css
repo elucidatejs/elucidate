@@ -1,0 +1,13 @@
+/* Styles for this article only, imported at the top of index.mdx. */
+.tour-swatches {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+.tour-swatches > span {
+  padding: var(--el-space-2) var(--el-space-1) 0;
+  border-top: 6px solid var(--c);
+  font-family: var(--el-font-mono);
+  font-size: var(--el-text-label);
+  color: var(--el-text-muted);
+}

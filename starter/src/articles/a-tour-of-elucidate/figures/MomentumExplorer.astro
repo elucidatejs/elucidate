@@ -1,0 +1,304 @@
+---
+// An interactive figure in plain TypeScript, no framework: gradient descent with and without
+// momentum. Colors come from the data palette, so the figure follows the theme and dark mode.
+interface Props {
+  /** Unique on the page; names the controls. */
+  name: string;
+  /** `large` fills an overlay. */
+  size?: 'compact' | 'large';
+}
+
+const { name, size = 'compact' } = Astro.props;
+const alphas = [0.02, 0.05, 0.1, 0.15];
+---
+
+<div class:list={['momentum', `momentum--${size}`]} data-momentum>
+  <div class="momentum__controls">
+    <label class="momentum__control">
+      <span class="momentum__label">Momentum β = <output data-beta-value>0.70</output></span>
+      <input class="el-slider" type="range" min="0" max="0.95" step="0.05" value="0.7" data-beta />
+    </label>
+    <div class="momentum__control">
+      <span class="momentum__label" id={`${name}-alpha`}>Step size α</span>
+      <div class="el-segmented" role="radiogroup" aria-labelledby={`${name}-alpha`}>
+        {
+          alphas.map((alpha) => (
+            <label>
+              <input type="radio" name={`${name}-alpha`} value={alpha} checked={alpha === 0.05} data-alpha />
+              <span>{alpha}</span>
+            </label>
+          ))
+        }
+      </div>
+    </div>
+    <label class="el-toggle momentum__control">
+      <input type="checkbox" role="switch" checked data-compare />
+      Compare with plain gradient descent
+    </label>
+  </div>
+  <ul class="momentum__legend" aria-hidden="true">
+    <li><span class="momentum__swatch" data-series="0"></span>With momentum</li>
+    <li data-plain-legend><span class="momentum__swatch" data-series="1"></span>Without momentum</li>
+  </ul>
+  <svg
+    class="momentum__plot"
+    viewBox="0 0 640 256"
+    tabindex="0"
+    role="img"
+    aria-label="Contour lines of a long, narrow valley with the path of each method toward the minimum. Use the arrow keys to step through the path with momentum."
+  ></svg>
+  <p class="momentum__readout" aria-live="polite" data-readout></p>
+  <div class="momentum__tip" popover="manual" data-tip></div>
+</div>
+
+<style>
+  .momentum {
+    display: grid;
+    gap: var(--el-space-4);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+  }
+  .momentum__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--el-space-4) var(--el-space-6);
+  }
+  .momentum__control {
+    display: grid;
+    gap: var(--el-space-2);
+  }
+  .momentum__control.el-toggle {
+    display: inline-flex;
+  }
+  .momentum__label {
+    color: var(--el-text-muted);
+  }
+  .momentum__label output {
+    color: var(--el-text);
+  }
+  .momentum__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--el-space-2) var(--el-space-5);
+    padding: 0;
+    list-style: none;
+  }
+  .momentum__legend li {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--el-space-2);
+  }
+  .momentum__swatch {
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+  }
+  .momentum__plot {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: pan-y;
+  }
+  @media (max-width: 639px) {
+    .momentum--compact {
+      padding-inline: var(--el-gutter);
+    }
+  }
+  .momentum__readout {
+    margin: 0;
+    color: var(--el-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  /* The tooltip is a popover: it sits in the top layer, above an open overlay too. */
+  .momentum__tip {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: var(--el-space-2) var(--el-space-3);
+    border: 1px solid var(--el-border);
+    border-radius: var(--el-radius-sm);
+    background: var(--el-surface);
+    color: var(--el-text);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-label);
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import { onThemeChange, type Palette, palette } from 'astro-elucidate/palette';
+  import { descend, ellipse, f, levels, type Point, stepsToConverge, VIEW } from './momentum.ts';
+
+  const STEPS = 60;
+  const SVG = 'http://www.w3.org/2000/svg';
+  const format = (n: number) => (n < 0.01 ? n.toExponential(1) : n.toPrecision(3));
+
+  function element(tag: string, attributes: Record<string, string | number>): SVGElement {
+    const node = document.createElementNS(SVG, tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
+    return node;
+  }
+
+  function setUp(root: HTMLElement): void {
+    const plot = root.querySelector('svg') as SVGSVGElement;
+    const beta = root.querySelector('[data-beta]') as HTMLInputElement;
+    const betaValue = root.querySelector('[data-beta-value]') as HTMLOutputElement;
+    const compare = root.querySelector('[data-compare]') as HTMLInputElement;
+    const readout = root.querySelector('[data-readout]') as HTMLElement;
+    const tip = root.querySelector('[data-tip]') as HTMLElement;
+    const plainLegend = root.querySelector('[data-plain-legend]') as HTMLElement;
+    const names = ['With momentum', 'Without momentum'];
+    const large = root.classList.contains('momentum--large');
+    let colors: Palette = palette();
+    // The plot is drawn in CSS pixels at its current size, so marks keep their size on phones.
+    let [width, height] = [640, 256];
+    const x = (u: number) => ((u - VIEW.u[0]) / (VIEW.u[1] - VIEW.u[0])) * width;
+    const y = (v: number) => height - ((v - VIEW.v[0]) / (VIEW.v[1] - VIEW.v[0])) * height;
+    let paths: Point[][] = [];
+    let cursor = -1;
+
+    const alpha = () =>
+      Number(root.querySelector<HTMLInputElement>('[data-alpha]:checked')?.value ?? 0.05);
+
+    function draw(): void {
+      const a = alpha();
+      const b = Number(beta.value);
+      betaValue.value = b.toFixed(2);
+      width = Math.round(plot.clientWidth) || 640;
+      height = Math.round(
+        large ? Math.max(240, Math.min(width * 0.45, innerHeight - 320)) : Math.max(200, width * 0.4),
+      );
+      plot.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      paths = compare.checked ? [descend(a, b, STEPS), descend(a, 0, STEPS)] : [descend(a, b, STEPS)];
+      plainLegend.hidden = !compare.checked;
+      for (const swatch of root.querySelectorAll<HTMLElement>('[data-series]')) {
+        swatch.style.background = colors.categorical[Number(swatch.dataset.series)] ?? '';
+      }
+
+      plot.replaceChildren();
+      // Contours: thin, in the chart-chrome color, so the paths carry the color.
+      for (const level of levels) {
+        const [ru, rv] = ellipse(level);
+        plot.append(
+          element('ellipse', {
+            cx: x(0),
+            cy: y(0),
+            rx: x(ru) - x(0),
+            ry: y(0) - y(rv),
+            fill: 'none',
+            stroke: colors.grid,
+            'stroke-width': 1,
+          }),
+        );
+      }
+      plot.append(element('circle', { cx: x(0), cy: y(0), r: 3, fill: colors.text }));
+      // Plain descent first, so the path with momentum is drawn on top.
+      [...paths.entries()].reverse().forEach(([series, path]) => {
+        const color = colors.categorical[series] ?? colors.text;
+        const d = path.map(([u, v], i) => `${i ? 'L' : 'M'}${x(u).toFixed(1)} ${y(v).toFixed(1)}`);
+        plot.append(
+          element('path', {
+            d: d.join(' '),
+            fill: 'none',
+            stroke: color,
+            'stroke-width': 2,
+            'stroke-linejoin': 'round',
+          }),
+        );
+        for (const [u, v] of path) {
+          // A ring in the background color keeps overlapping steps apart.
+          plot.append(
+            element('circle', {
+              cx: x(u),
+              cy: y(v),
+              r: 3,
+              fill: color,
+              stroke: colors.background,
+              'stroke-width': 1.5,
+            }),
+          );
+        }
+      });
+
+      const steps = (momentum: number) => {
+        const n = stepsToConverge(a, momentum);
+        return n === undefined ? 'more than 2000 steps' : `${n} steps`;
+      };
+      readout.textContent = compare.checked
+        ? `To get within a millionth of the minimum: ${steps(b)} with momentum, ${steps(0)} without.`
+        : `To get within a millionth of the minimum: ${steps(b)} with momentum.`;
+      if (cursor >= 0) show(0, cursor);
+    }
+
+    function show(series: number, index: number): void {
+      const point = paths[series]?.[index];
+      if (!point) return hide();
+      tip.textContent = `${names[series]}, step ${index}: f = ${format(f(point))}`;
+      if (!tip.matches(':popover-open')) tip.showPopover();
+      const { x: left, y: top } = onScreen(point);
+      const tipBox = tip.getBoundingClientRect();
+      tip.style.left = `${Math.min(Math.max(8, left - tipBox.width / 2), innerWidth - tipBox.width - 8)}px`;
+      tip.style.top = `${top - tipBox.height - 10 < 8 ? top + 12 : top - tipBox.height - 10}px`;
+    }
+
+    /** Where a point of the plane is in the window, however the plot is scaled. */
+    function onScreen([u, v]: Point): DOMPoint {
+      return new DOMPoint(x(u), y(v)).matrixTransform(plot.getScreenCTM() ?? undefined);
+    }
+
+    function hide(): void {
+      if (tip.matches(':popover-open')) tip.hidePopover();
+    }
+
+    // Hover: the step nearest the pointer, within 16 px.
+    plot.addEventListener('pointermove', (event) => {
+      let best: [number, number, number] | undefined;
+      paths.forEach((path, series) => {
+        path.forEach((point, index) => {
+          const screen = onScreen(point);
+          const distance = Math.hypot(screen.x - event.clientX, screen.y - event.clientY);
+          if (distance < 16 && (!best || distance < best[0])) best = [distance, series, index];
+        });
+      });
+      if (best) show(best[1], best[2]);
+      else hide();
+    });
+    plot.addEventListener('pointerleave', hide);
+    // Keyboard: the arrow keys walk along the path with momentum.
+    plot.addEventListener('keydown', (event) => {
+      const moves: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 };
+      if (event.key === 'Escape' && tip.matches(':popover-open')) {
+        // The first Esc closes the tooltip; the next one closes an overlay around the figure.
+        event.preventDefault();
+        cursor = -1;
+        return hide();
+      }
+      if (!(event.key in moves)) return;
+      event.preventDefault();
+      cursor = Math.min(Math.max(cursor + (moves[event.key] ?? 0), 0), STEPS);
+      show(0, cursor);
+    });
+    plot.addEventListener('blur', () => {
+      cursor = -1;
+      hide();
+    });
+    root.addEventListener('input', draw);
+    let lastWidth = 0;
+    new ResizeObserver(() => {
+      if (plot.clientWidth === lastWidth) return;
+      lastWidth = plot.clientWidth;
+      draw();
+    }).observe(plot);
+    onThemeChange(() => {
+      colors = palette();
+      draw();
+    });
+    draw();
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-momentum]')) setUp(root);
+</script>
