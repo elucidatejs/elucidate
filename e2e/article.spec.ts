@@ -43,8 +43,10 @@ test('wide screens show a numbered floating contents list that follows the reade
   await expect(page.locator('.el-toc--disclosure')).toBeHidden();
   await expect(toc.locator('.el-toc__number').first()).toHaveText('01');
   await page.evaluate(() => document.getElementById('figures')?.scrollIntoView());
-  await expect(toc.getByRole('link', { name: /Figures/ })).toHaveAttribute('aria-current', 'true');
-  await expect(toc.getByRole('link', { name: /The hero/ })).not.toHaveAttribute('aria-current');
+  // The list fades out while a wide figure passes under it, so look for its links even then.
+  const link = (name: RegExp) => toc.getByRole('link', { name, includeHidden: true });
+  await expect(link(/Figures/)).toHaveAttribute('aria-current', 'true');
+  await expect(link(/The hero/)).not.toHaveAttribute('aria-current');
 });
 
 test('phones show contents as a disclosure under the byline', async ({ page }) => {
