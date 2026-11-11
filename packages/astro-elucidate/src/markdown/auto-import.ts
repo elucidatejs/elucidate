@@ -6,6 +6,7 @@ import { visit } from 'unist-util-visit';
 export const builtInComponents = [
   'Acknowledgments',
   'AppendixSection',
+  'ArticleList',
   'Aside',
   'Block',
   'Button',

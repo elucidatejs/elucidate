@@ -1,9 +1,9 @@
 ---
-import config from 'virtual:elucidate/config';
 import ArticleIndex from '../components/ArticleIndex.astro';
 import Base from '../layouts/Base.astro';
+import { indexTitle } from '../lib/paths.ts';
 ---
 
-<Base title={config.title}>
+<Base title={indexTitle()}>
   <ArticleIndex />
 </Base>

@@ -74,10 +74,15 @@
     color: var(--el-bg);
   }
 
+  /* The same rows in the index and, through ArticleList, inside the prose of a page; there they
+     keep the index's type and spacing instead of the prose's. */
   .el-cards {
     list-style: none;
     padding: 0;
     border-block-start: 1px solid var(--el-border);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-ui);
+    line-height: 1.5;
   }
   .el-card {
     position: relative;
@@ -86,6 +91,10 @@
     gap: var(--el-space-2) var(--el-space-6);
     padding-block: var(--el-space-6);
     border-block-end: 1px solid var(--el-border);
+  }
+  .el-cards .el-card,
+  .el-card > :is(p, h2) {
+    margin: 0;
   }
   .el-card > :not(.el-card__thumb) {
     grid-column: 1;

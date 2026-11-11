@@ -55,3 +55,27 @@ test('no horizontal scroll at 320px', async ({ page }) => {
     expect(await horizontalOverflow(page)).toBe(0);
   }
 });
+
+test('feeds and machine-readable files are served under the base path', async ({ request }) => {
+  const site = `https://elucidatejs.github.io${base}`;
+  expect(await (await request.get('rss.xml')).text()).toContain(
+    `<link>${site}research/a-tour-of-elucidate/</link>`,
+  );
+  expect(await (await request.get('llms.txt')).text()).toContain(
+    `- [Hello, World](${site}research/hello-world/): `,
+  );
+  expect(await (await request.get('robots.txt')).text()).toContain(
+    `Sitemap: ${site}sitemap-index.xml`,
+  );
+  const sitemap = await (await request.get('sitemap-0.xml')).text();
+  expect(sitemap).toContain(`<loc>${site}research/hello-world/</loc>`);
+  expect(sitemap).not.toContain('rss.xml');
+});
+
+test('every page links the RSS feed', async ({ page }) => {
+  await page.goto('about/');
+  await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute(
+    'href',
+    `${base}rss.xml`,
+  );
+});

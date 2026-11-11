@@ -1,0 +1,26 @@
+---
+import { listedArticles } from '../lib/articles.ts';
+import ArticleCard from './ArticleCard.astro';
+
+interface Props {
+  /** Show at most this many articles, newest first. */
+  limit?: number | undefined;
+  /** Only list articles with this tag. */
+  tag?: string | undefined;
+}
+
+const { limit, tag } = Astro.props;
+const articles = (await listedArticles(tag)).slice(0, limit);
+---
+
+{
+  articles.length > 0 ? (
+    <ol class="el-cards">
+      {articles.map((article) => (
+        <ArticleCard article={article} />
+      ))}
+    </ol>
+  ) : (
+    <p class="el-empty">No published articles yet.</p>
+  )
+}
