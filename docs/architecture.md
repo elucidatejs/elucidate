@@ -3,7 +3,7 @@
 Elucidate is a pnpm workspace with two published packages (`astro-elucidate`, `create-elucidate`)
 and a starter site that doubles as the demo and the end-to-end test target. This file records how
 the pieces fit, why each dependency exists, and where the implementation deviates from
-[spec.md](spec.md). It grows with each milestone.
+[spec.md](spec.md).
 
 ## Packages
 
@@ -38,7 +38,7 @@ the pieces fit, why each dependency exists, and where the implementation deviate
 | `components/` | Structural components (Header, Byline, TableOfContents, Appendix, …), the author-facing ones exported from `astro-elucidate/components` (Figure, Block, Aside, Note, Button, Overlay, Acknowledgments, Contributions, AppendixSection), `blocks/` for bespoke articles, and `examples/` for the overview page. |
 | `lib/` | Plain functions the routes share: article lists and status, URLs with the base path, dates, hero lookup, citation text and BibTeX, license and repository links, and the feed formats. |
 | `markdown/` | The remark and rehype plugins (one file each, order in `index.ts`), the BibTeX loader and reference formatter, the KaTeX/MathJax renderers, and the grayscale code theme. |
-| `styles/` | Cascade-layered CSS: tokens, base, layout grid, chrome, components, article, contents, figures, scholarly text (equations, citations, sidenotes, cards) and the appendix. |
+| `styles/` | Cascade-layered CSS: tokens, base, layout grid, chrome, components, article, contents, figures, scholarly text (equations, citations, sidenotes, cards), the appendix and print. |
 | `client/` | Client scripts, bundled by Astro: theme toggle, contents scroll-spy, citation and footnote cards, copy buttons, overlays; `index.ts` is `astro-elucidate/client`. |
 
 The integration hands the validated config and the optional `src/styles/theme.css` to the engine
@@ -85,6 +85,22 @@ Heroes are found with `import.meta.glob` over `src/articles/*/Hero.astro` and `h
   packed `create-elucidate`, `npm install` with the packed engine, `npm run new`, `check` and
   `build` for a site at `https://ada.github.io/lab-notes`, then serves `dist/` under `/lab-notes/`
   only, as GitHub Pages does, and follows every link from the homepage. CI runs it.
+
+### Quality checks and release (M5)
+
+- **Print.** `print.css` sets print tokens in the `tokens` layer (every width becomes the text
+  column, type in points) and hides the chrome in the `utilities` layer, so it wins over the
+  components without higher specificity.
+- **`pnpm budgets`** reads the starter's `dist/`: the scripts of a page (inline, and bundled with
+  the chunks they import, each counted once), its stylesheets and `<style>` blocks gzipped at
+  level 9, and its font preloads. Scripts are the engine's when their chunk is named after one of
+  the engine's `.astro` files.
+- **`pnpm lighthouse`** serves the build with `astro preview` and runs Lighthouse on Playwright's
+  Chromium, then prints each score and the audits that cost points.
+- **`release.yml`** runs `changeset publish` on `main` when the version is not `0.0.0`. Changesets
+  publishes through pnpm, which uses npm trusted publishing (OIDC, with provenance) when the
+  workflow has `id-token: write`, then the workflow pushes the tags. Versions are bumped in a
+  "Version Packages" pull request ([contributing.md](contributing.md#releasing)).
 
 ## Dependencies
 
@@ -143,7 +159,6 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 | Framework components as heroes (`Hero.svelte`, `Hero.tsx`, §7.4) | Only `Hero.astro` and image files are found by convention; a framework component is rendered from `Hero.astro` | Globbing every framework extension would need each integration installed; one line in `Hero.astro` does the same. |
 | `--el-font-serif` (§12.2) | A token with a fallback stack; the font is not registered | Registering it would download it on every build for an optional style. `docs/design.md` says how to load it. |
 | Typecheck with `tsc` | `astro check` for `astro-elucidate` too | The engine imports `.astro` files, which `tsc` cannot resolve. |
-| Features by milestone (§18) | The config and front-matter schemas accept every v0.1 field now; fields for later milestones are validated but unused | Sites written today keep working as features land. The docs say which fields take effect later. |
 | `home: 'page'` in M4 (§18) | Route switch and both collision errors in M1 | They fall out of the §20 #6 check; `ArticleList` came in M4. |
 | Index title with `home: 'page'` (§10.1) | The label of the `nav` item that links to the index, else "Articles"; no intro | The site title and description belong to the homepage then. |
 | "All internal links MUST respect `base`" (§5) | Also Markdown links and images with a root path (`markdown/base-links.ts`); JSX in MDX is left alone | Authors write `/about/` as they would anywhere; a base path should not change their text. |
@@ -151,8 +166,12 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 | `create-elucidate` options (§15) | `--title`, `--url` and `--yes` for use without a terminal, and `--template` for a local starter folder | The smoke test and CI need it without prompts, and before the first release there is no tag to download. Without a URL, `https://example.github.io/<folder>` stands in and no repository is set. |
 | Starter README and AGENTS.md (§17.2, §17.3) | Written in M4 | `create-elucidate` copies them into every new site. |
 | Done when: "push → live on GitHub Pages" (§18 M4) | `pnpm smoke` covers everything up to the push, under a project path, on every CI run; the push itself was checked once by hand, on a test repository with a project path | CI cannot create repositories or Pages sites. |
-| `release.yml` (§4.1) | Deferred to M5 | Nothing is published before M5. |
-| Changesets opens the "Version Packages" PR from Actions (§16, §21) | `release.yml` will only publish (`changeset publish` skips versions already on npm); the version bump is a normal PR made with `pnpm changeset version` | The repository setting "Allow GitHub Actions to create and approve pull requests" stays off, so no workflow can open or approve pull requests. |
+| Trusted publishing configured before M5 (§4, §21) | The first release publishes with a short-lived token, the `NPM_TOKEN` secret; trusted publishing is set up right after it and the secret deleted ([contributing.md](contributing.md#npm-setup-maintainer-once)) | npm adds a trusted publisher only to a package that exists. |
+| Changesets opens the "Version Packages" PR from Actions (§16, §21) | `release.yml` only publishes (`changeset publish` skips versions already on npm, and nothing is published at `0.0.0`); the version bump is a normal PR made with `pnpm changeset version` | The repository setting "Allow GitHub Actions to create and approve pull requests" stays off, so no workflow can open or approve pull requests. |
+| Lighthouse check (§13.3) | `pnpm lighthouse` runs Lighthouse through `pnpm dlx` at a pinned version | Lighthouse and its dependencies stay out of the workspace and the lockfile; it is a check, not part of the build. |
+| Core JS budget: "all scripts in §6.6 that the page uses" (§13.3) | The site's own scripts, such as the tour's interactive figure, are reported but not counted; all CSS but math counts, the site's `theme.css` included | The budget is the engine's; an author's figure code is theirs. |
+| — | An extra rehype step, `rehypeTaskLists`, wraps each GFM task-list checkbox and its text in a `<label>` | GFM renders bare disabled checkboxes, which axe and Lighthouse report as form fields without labels. |
+| Display math between `$$` (§6.3) | `$$…$$` alone in a paragraph is a display equation too (`remarkDollarSigns`) | remark-math reads it as inline math, and the README sample (§17.1) writes it on one line, as Pandoc and GitHub allow. |
 | Issue and PR templates (§18 M0) | Not added | They belong in the org-level `elucidatejs/.github` repo (§4.0). |
 | Pipeline order in §6.3 (footnotes, then math) | rehype math runs before footnotes | Footnotes copied into the margin and the appendix then contain rendered math. The order is documented in `src/markdown/index.ts`. |
 | `rehype-katex` or a MathJax equivalent (§6.3) | One `math` plugin over both engines: KaTeX's `renderToString` and MathJax 4's own API (`@mathjax/src`: TeX → SVG with assistive MathML) | `rehype-mathjax` 7 still uses MathJax 3; one plugin gives both engines the same equation wrapper, labels and file:line errors. |
@@ -178,9 +197,13 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 
 ## Verify-at-implementation log (spec §20)
 
-Checked on 2026-11-11. Items not listed yet are checked in the milestone that first depends on them.
+Checked on 2026-11-11, each in the milestone that first depended on it.
 
-- **10. npm names**: `astro-elucidate` and `create-elucidate` are unclaimed (`npm view` returns 404).
+- **10. npm names and trusted publishing**: `astro-elucidate` and `create-elucidate` are unclaimed
+  (`npm view` returns 404; checked again in M5 with `changeset publish-plan`). Trusted publishing
+  (M5) is configured per package on npmjs.com, which requires the package to exist. Changesets 3
+  publishes a pnpm workspace with `pnpm publish`, and pnpm 12 exchanges the GitHub Actions OIDC
+  token itself, so the workflow needs no npm CLI and no token once the publisher is set.
 - **1. Markdown processor**: `astro@7.4.10` declares `@astrojs/markdown-remark ^7.3.0` as a peer
   dependency and depends on `@astrojs/markdown-satteri`; `@astrojs/mdx@8.1.4` declares both as
   peers. `markdown: { processor: unified({ remarkPlugins, rehypePlugins }) }` selects the unified
