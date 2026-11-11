@@ -1,0 +1,43 @@
+---
+import config from 'virtual:elucidate/config';
+import { withBase } from '../lib/paths.ts';
+
+const current = Astro.url.pathname;
+---
+
+<header class="el-header">
+  <div class="el-header__inner">
+    <a class="el-wordmark" href={withBase('/')}>
+      {config.logo ? <img src={withBase(config.logo)} alt={config.title} /> : config.title}
+    </a>
+    <nav class="el-nav" aria-label="Main">
+      <ul>
+        {
+          config.nav.map((item) => {
+            const href = withBase(item.href);
+            return (
+              <li>
+                <a href={href} aria-current={href === current ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+    <button class="el-theme-toggle" type="button" aria-label="Dark theme" aria-pressed="false" data-el-theme-toggle>
+      <svg class="el-theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"></path>
+      </svg>
+      <svg class="el-theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<script>
+  import '../client/theme.ts';
+</script>

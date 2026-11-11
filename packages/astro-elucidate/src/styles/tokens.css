@@ -1,0 +1,92 @@
+/* Design tokens (docs/spec.md §12). Override any --el-* token in src/styles/theme.css. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* Fonts: --el-font-inter and --el-font-jetbrains-mono come from the Astro Fonts API. */
+    --el-font-sans: var(--el-font-inter, system-ui), system-ui, sans-serif;
+    --el-font-mono: var(--el-font-jetbrains-mono, ui-monospace), ui-monospace, monospace;
+    --el-font-serif: "Source Serif 4", Georgia, serif;
+    --el-font-body: var(--el-font-sans);
+
+    /* Type scale: size / line height. Display sizes shrink on narrow screens. */
+    --el-text-display: 48px;
+    --el-leading-display: 1.1;
+    --el-text-h2: 28px;
+    --el-text-h3: 20px;
+    --el-text-lead: 22px;
+    --el-text-body: 18px;
+    --el-text-ui: 16px;
+    --el-text-small: 14px;
+    --el-text-label: 12px;
+
+    /* Color: light and dark values in one place; data and figures own all other colors. */
+    --el-bg: light-dark(#ffffff, #0d0d0d);
+    --el-surface: light-dark(#f7f7f7, #1a1a1a);
+    --el-border: light-dark(#e5e5e5, #2e2e2e);
+    --el-text-muted: light-dark(#6b6b6b, #a3a3a3);
+    --el-text: light-dark(#0d0d0d, #f5f5f5);
+    --el-accent: var(--el-text);
+    --el-backdrop: light-dark(rgb(0 0 0 / 0.4), rgb(0 0 0 / 0.6));
+
+    /* Spacing: 4 px base. */
+    --el-space-1: 4px;
+    --el-space-2: 8px;
+    --el-space-3: 12px;
+    --el-space-4: 16px;
+    --el-space-5: 24px;
+    --el-space-6: 32px;
+    --el-space-7: 48px;
+    --el-space-8: 64px;
+    --el-space-9: 80px;
+    --el-space-10: 96px;
+
+    /* Widths. */
+    --el-width-text: 680px;
+    --el-width-wide: 920px;
+    --el-width-page: 1200px;
+    --el-width-margin: 240px;
+    --el-gutter: 20px;
+
+    --el-radius-sm: 6px;
+    --el-radius-md: 12px;
+    --el-radius-pill: 999px;
+    --el-shadow-overlay: 0 24px 64px rgb(0 0 0 / 0.18);
+
+    --el-duration: 180ms;
+    --el-ease: ease-out;
+
+    --el-z-header: 10;
+    --el-z-toc: 5;
+    --el-z-popover: 20;
+
+    /* Faint grid behind the page top; set to none to disable. */
+    --el-motif-grid:
+      linear-gradient(to right, var(--el-border) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(to bottom, var(--el-border) 1px, transparent 1px) 0 0 / 24px 24px;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  @media (max-width: 639px) {
+    :root {
+      --el-text-display: 40px;
+      --el-text-h2: 24px;
+      --el-text-lead: 19px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --el-duration: 0ms;
+    }
+  }
+}

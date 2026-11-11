@@ -1,0 +1,28 @@
+---
+import '../styles/article.css';
+import config from 'virtual:elucidate/config';
+import Base from './Base.astro';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  /** Set when used as the layout of a Markdown/MDX page. */
+  frontmatter?: { title?: string; description?: string };
+}
+
+const { frontmatter = {} } = Astro.props;
+const title = Astro.props.title ?? frontmatter.title ?? config.title;
+const description = Astro.props.description ?? frontmatter.description;
+---
+
+<Base title={title} description={description}>
+  <article class="el-page">
+    <header class="el-title-block el-grid">
+      <h1 class="el-title">{title}</h1>
+      {description && <p class="el-dek">{description}</p>}
+    </header>
+    <div class="el-prose el-grid">
+      <slot />
+    </div>
+  </article>
+</Base>

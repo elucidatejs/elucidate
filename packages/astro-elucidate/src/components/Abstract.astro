@@ -1,0 +1,15 @@
+---
+import { renderMarkdown } from '../lib/markdown.ts';
+
+export interface Props {
+  /** Markdown source from the `abstract` front-matter field. */
+  abstract: string;
+}
+
+const html = await renderMarkdown(Astro.props.abstract);
+---
+
+<section class="el-abstract" aria-labelledby="el-abstract-label">
+  <h2 class="el-label" id="el-abstract-label">Abstract</h2>
+  <Fragment set:html={html} />
+</section>

@@ -1,0 +1,136 @@
+/* Site chrome: skip link, header, navigation, theme toggle, footer. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-skip {
+    position: absolute;
+    inset-inline-start: var(--el-space-4);
+    top: -100px;
+    z-index: calc(var(--el-z-header) + 1);
+    padding: var(--el-space-2) var(--el-space-4);
+    background: var(--el-text);
+    color: var(--el-bg);
+    border-radius: var(--el-radius-pill);
+  }
+  .el-skip:focus {
+    top: var(--el-space-2);
+  }
+
+  /* Header: transparent at the top; background and hairline appear once the page scrolls. */
+  .el-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--el-z-header);
+    background: var(--el-bg);
+    border-block-end: 1px solid var(--el-border);
+  }
+  @supports (animation-timeline: scroll()) {
+    .el-header {
+      background: transparent;
+      border-block-end-color: transparent;
+      animation: el-header-scrolled linear both;
+    }
+    /* A separate rule, so minifiers cannot fold the timeline into the shorthand. */
+    :root .el-header {
+      animation-timeline: scroll();
+      animation-range: 0 48px;
+    }
+  }
+  @keyframes el-header-scrolled {
+    to {
+      background: var(--el-bg);
+      border-block-end-color: var(--el-border);
+    }
+  }
+  .el-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--el-space-2) var(--el-space-5);
+    max-width: calc(var(--el-width-page) + 2 * var(--el-gutter));
+    margin-inline: auto;
+    padding: var(--el-space-2) var(--el-gutter);
+    min-height: 64px;
+  }
+  .el-wordmark {
+    margin-inline-end: auto;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .el-wordmark img {
+    height: 28px;
+    width: auto;
+  }
+  .el-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--el-space-5);
+    list-style: none;
+    padding: 0;
+  }
+  .el-nav a,
+  .el-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+  .el-nav a:hover,
+  .el-nav a[aria-current="page"] {
+    text-decoration: underline;
+  }
+
+  .el-theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-inline-end: calc(-1 * var(--el-space-3));
+    padding: 0;
+    border: 0;
+    border-radius: var(--el-radius-pill);
+    background: none;
+    cursor: pointer;
+  }
+  .el-theme-toggle:hover {
+    background: var(--el-surface);
+  }
+  .el-theme-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+  :root:not([data-theme]) .el-theme-toggle,
+  :root[data-theme="dark"] .el-theme-toggle__moon,
+  :root[data-theme="light"] .el-theme-toggle__sun {
+    display: none;
+  }
+
+  .el-footer {
+    margin-block-start: var(--el-space-10);
+    border-block-start: 1px solid var(--el-border);
+    color: var(--el-text-muted);
+    font-size: var(--el-text-small);
+  }
+  .el-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--el-space-2) var(--el-space-5);
+    max-width: calc(var(--el-width-page) + 2 * var(--el-gutter));
+    margin-inline: auto;
+    padding: var(--el-space-5) var(--el-gutter) var(--el-space-7);
+  }
+  .el-footer ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--el-space-5);
+    list-style: none;
+    padding: 0;
+  }
+  .el-footer p {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

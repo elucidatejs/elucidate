@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { base } from './e2e/site.ts';
 
 const port = 4322;
 
@@ -8,11 +9,11 @@ export default defineConfig({
   testDir: 'e2e',
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI ? 'github' : 'list',
-  use: { baseURL: `http://localhost:${port}` },
+  use: { baseURL: `http://localhost:${port}${base}` },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: `pnpm --filter elucidate-starter preview --port ${port} --ignore-lock`,
-    url: `http://localhost:${port}`,
+    url: `http://localhost:${port}${base}`,
     reuseExistingServer: !process.env.CI,
   },
 });

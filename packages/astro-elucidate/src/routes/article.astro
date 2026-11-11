@@ -1,0 +1,27 @@
+---
+import { render } from 'astro:content';
+import ArticleLayout from '../layouts/Article.astro';
+import { builtArticles } from '../lib/articles.ts';
+import { heroFor } from '../lib/heroes.ts';
+
+export async function getStaticPaths() {
+  return (await builtArticles()).map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+// biome-ignore lint/suspicious/noExplicitAny: the entry comes straight from getCollection.
+const { Content, headings } = await render(article as any);
+const hero = heroFor(article.id);
+if (hero?.image && !article.data.hero.alt) {
+  throw new Error(
+    `${hero.file} needs alt text.\n  Fix: add hero: { alt: "…" } to the front matter of src/articles/${article.id}/index.mdx.`,
+  );
+}
+---
+
+<ArticleLayout article={article} headings={headings} hero={hero}>
+  <Content />
+</ArticleLayout>

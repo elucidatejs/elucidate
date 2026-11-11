@@ -9,11 +9,15 @@ articles. This file is a stub during v0.1; it becomes final in milestone M5.
 
 ```
 packages/astro-elucidate/   the engine: Astro integration (ships TypeScript source, no build step)
+  src/index.ts              integration: settings, Markdown, fonts, virtual modules, routes
+  src/{config.ts,schema/}   config and front-matter schemas, fix-it error formatting
+  src/{routes,layouts,components}/  injected pages, layouts, structural components
+  src/{lib,markdown,client,styles}/ shared helpers, remark plugins, client scripts, layered CSS
 packages/create-elucidate/  `npm create elucidate` (compiled to dist/ with tsc)
-starter/                    the site template = demo site = e2e target
+starter/                    the site template = demo site = e2e target (example articles in src/articles/)
 e2e/                        Playwright + axe tests against the built starter
 scripts/shots.ts            screenshot script for visual review (not a test)
-docs/                       spec.md, architecture.md (deviations live there), later topic docs
+docs/                       spec.md, architecture.md (deviations live there), topic docs
 ```
 
 ## Commands
@@ -22,7 +26,7 @@ docs/                       spec.md, architecture.md (deviations live there), la
 pnpm install
 pnpm dev          # starter dev server against the local packages
 pnpm lint         # Biome (pnpm format to fix)
-pnpm typecheck    # tsc for packages, astro check for the starter
+pnpm typecheck    # astro check for astro-elucidate and the starter, tsc for create-elucidate
 pnpm test         # Vitest unit tests
 pnpm build        # builds create-elucidate and the starter
 pnpm e2e          # Playwright + axe; run pnpm build first

@@ -1,0 +1,100 @@
+/* Table of contents: a disclosure under the byline, or a sticky column in the left margin. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-toc {
+    font-size: var(--el-text-small);
+    color: var(--el-text-muted);
+  }
+  .el-toc ol {
+    list-style: none;
+    padding: 0;
+  }
+  .el-toc li {
+    margin-block: var(--el-space-2);
+  }
+  .el-toc ol ol {
+    padding-inline-start: 2.6em;
+  }
+  .el-toc a {
+    display: flex;
+    gap: 0.8em;
+    text-decoration: none;
+    padding-inline-start: var(--el-space-3);
+    border-inline-start: 2px solid transparent;
+  }
+  .el-toc a:hover {
+    color: var(--el-text);
+  }
+  .el-toc a[aria-current="true"] {
+    color: var(--el-text);
+    border-inline-start-color: var(--el-accent);
+  }
+  .el-toc__number {
+    font-family: var(--el-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Under the byline it reads as one more row of it: same column, closed by its own hairline. */
+  .el-toc--disclosure {
+    grid-column: wide;
+    margin-block-start: calc(-1 * var(--el-space-4));
+    border-block-end: 1px solid var(--el-border);
+  }
+  .el-toc--disclosure[open] {
+    padding-block-end: var(--el-space-3);
+  }
+  @media (max-width: 639px) {
+    .el-toc--disclosure {
+      grid-column: text;
+    }
+  }
+  .el-toc--disclosure summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .el-toc--disclosure summary::-webkit-details-marker {
+    display: none;
+  }
+  .el-toc--disclosure summary::after {
+    content: "+";
+    font-size: var(--el-text-ui);
+  }
+  .el-toc--disclosure[open] summary::after {
+    content: "−";
+  }
+
+  .el-toc--float {
+    display: none;
+    grid-column: auto;
+  }
+  .el-toc--float .el-label {
+    display: block;
+    margin-block-end: var(--el-space-3);
+  }
+
+  @media (min-width: 1280px) {
+    .el-toc--disclosure {
+      display: none;
+    }
+    .el-toc--float {
+      display: block;
+      /* Spans the article body, so the sticky list inside follows the reader to the end; the top
+         inset matches the prose padding so it starts level with the first line. */
+      position: absolute;
+      inset-block: var(--el-space-6) 0;
+      inset-inline-start: max(var(--el-gutter), (100% - var(--el-width-page)) / 2);
+      width: min(var(--el-width-margin), (100% - var(--el-width-text)) / 2 - 2 * var(--el-gutter));
+    }
+    .el-toc--float > nav {
+      position: sticky;
+      top: var(--el-space-10);
+      max-height: calc(100vh - var(--el-space-10) - var(--el-space-5));
+      overflow-y: auto;
+    }
+  }
+}
