@@ -1,0 +1,55 @@
+---
+import config from 'virtual:elucidate/config';
+import { listedArticles, listedTags } from '../lib/articles.ts';
+import { indexPath, tagPath } from '../lib/paths.ts';
+import ArticleCard from './ArticleCard.astro';
+
+interface Props {
+  /** Only list articles with this tag. */
+  tag?: string | undefined;
+}
+
+const { tag } = Astro.props;
+const articles = await listedArticles(tag);
+const tags = await listedTags();
+---
+
+<section class="el-index">
+  <div class="el-title-block el-grid">
+    <h1 class="el-title">{config.title}</h1>
+    {config.description && <p class="el-index__intro">{config.description}</p>}
+    {
+      tags.length > 0 && (
+        <nav class="el-tags" aria-label="Filter by tag">
+          <ul>
+            <li>
+              <a class="el-pill el-label" href={indexPath()} aria-current={tag ? undefined : 'page'}>
+                All
+              </a>
+            </li>
+            {tags.map((t) => (
+              <li>
+                <a class="el-pill el-label" href={tagPath(t)} aria-current={t === tag ? 'page' : undefined}>
+                  {t}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+  </div>
+  <div class="el-grid">
+    {
+      articles.length > 0 ? (
+        <ol class="el-cards">
+          {articles.map((article) => (
+            <ArticleCard article={article} />
+          ))}
+        </ol>
+      ) : (
+        <p class="el-empty">No published articles yet.</p>
+      )
+    }
+  </div>
+</section>

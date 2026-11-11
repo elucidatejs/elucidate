@@ -1,0 +1,40 @@
+---
+import { Font } from 'astro:assets';
+import config from 'virtual:elucidate/config';
+import { withBase } from '../lib/paths.ts';
+
+export interface Props {
+  title: string;
+  description?: string;
+  /** Adds `robots: noindex`, e.g. for articles in review. */
+  noindex?: boolean;
+}
+
+const { title, description = config.description, noindex = false } = Astro.props;
+const fullTitle = title === config.title ? title : `${title} · ${config.title}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{fullTitle}</title>
+{description && <meta name="description" content={description} />}
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex" />}
+<link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+<script is:inline>
+  // Pre-paint: apply the stored or system theme before first paint to avoid a flash.
+  (() => {
+    let theme;
+    try {
+      theme = localStorage.getItem('el-theme');
+    } catch {}
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<Font cssVariable="--el-font-inter" preload />
+<Font cssVariable="--el-font-jetbrains-mono" preload={[{ weight: '400' }]} />
+<slot />

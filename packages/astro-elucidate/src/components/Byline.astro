@@ -1,0 +1,65 @@
+---
+import type { Article } from '../lib/articles.ts';
+import { formatDay, isoDay } from '../lib/format.ts';
+
+export interface Props {
+  article: Article;
+}
+
+const { authors, affiliations, date, updated, doi } = Astro.props.article.data;
+const withAffiliations = authors.some((author) => author.affiliations.length > 0);
+const anyEqual = authors.some((author) => author.equal);
+---
+
+<div class="el-byline">
+  <div class:list={['el-byline__people', { 'el-byline__people--single': !withAffiliations }]}>
+    <p class="el-label el-byline__label">Authors</p>
+    {withAffiliations && <p class="el-label el-byline__label el-byline__label--affiliations">Affiliations</p>}
+    {
+      authors.map((author) => (
+        <>
+          <p class="el-byline__author">
+            {author.url ? <a href={author.url}>{author.name}</a> : author.name}
+            {author.equal && <sup aria-label="equal contribution">*</sup>}
+            {author.orcid && (
+              <a class="el-byline__orcid" href={`https://orcid.org/${author.orcid}`} aria-label={`ORCID iD of ${author.name}`}>
+                iD
+              </a>
+            )}
+          </p>
+          {withAffiliations && (
+            <p class="el-byline__affiliation">
+              {author.affiliations.map((key, i) => {
+                const affiliation = affiliations[key];
+                if (!affiliation) return null;
+                return (
+                  <>
+                    {i > 0 && ', '}
+                    {affiliation.url ? <a href={affiliation.url}>{affiliation.name}</a> : affiliation.name}
+                  </>
+                );
+              })}
+            </p>
+          )}
+        </>
+      ))
+    }
+  </div>
+  <div>
+    <p class="el-label el-byline__label">Published</p>
+    <p><time datetime={isoDay(date)}>{formatDay(date)}</time></p>
+    {
+      updated && (
+        <>
+          <p class="el-label el-byline__label el-byline__updated">Updated</p>
+          <p><time datetime={isoDay(updated)}>{formatDay(updated)}</time></p>
+        </>
+      )
+    }
+  </div>
+  <div>
+    <p class="el-label el-byline__label">DOI</p>
+    <p>{doi ? <a href={`https://doi.org/${doi}`}>{doi}</a> : 'No DOI yet'}</p>
+  </div>
+  {anyEqual && <p class="el-byline__note">* Equal contribution</p>}
+</div>

@@ -1,0 +1,16 @@
+---
+import ArticleIndex from '../components/ArticleIndex.astro';
+import Base from '../layouts/Base.astro';
+import { listedTags } from '../lib/articles.ts';
+import { slugify } from '../lib/paths.ts';
+
+export async function getStaticPaths() {
+  return (await listedTags()).map((tag) => ({ params: { tag: slugify(tag) }, props: { tag } }));
+}
+
+const { tag } = Astro.props;
+---
+
+<Base title={`Tagged “${tag}”`}>
+  <ArticleIndex tag={tag} />
+</Base>

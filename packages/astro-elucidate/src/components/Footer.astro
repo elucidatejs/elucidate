@@ -1,0 +1,15 @@
+---
+import config from 'virtual:elucidate/config';
+import { withBase } from '../lib/paths.ts';
+---
+
+<footer class="el-footer">
+  <div class="el-footer__inner">
+    <p>{config.publisher ?? config.title}. Articles are licensed {config.license} unless noted otherwise.</p>
+    <nav aria-label="Footer">
+      <ul>
+        {config.nav.map((item) => <li><a href={withBase(item.href)}>{item.label}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+</footer>

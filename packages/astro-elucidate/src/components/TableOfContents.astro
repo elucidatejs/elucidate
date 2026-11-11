@@ -1,0 +1,57 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+export interface Props {
+  headings: MarkdownHeading[];
+  /** `disclosure` sits under the byline on narrow screens; `float` sits in the left margin. */
+  variant: 'disclosure' | 'float';
+}
+
+// Sections (h2) get two-digit numbers; subsections (h3) nest one level without numbers.
+const sections: { heading: MarkdownHeading; children: MarkdownHeading[] }[] = [];
+for (const heading of Astro.props.headings) {
+  if (heading.depth === 2) sections.push({ heading, children: [] });
+  else if (heading.depth === 3) sections.at(-1)?.children.push(heading);
+}
+const number = (i: number) => String(i + 1).padStart(2, '0');
+const float = Astro.props.variant === 'float';
+const Wrapper = float ? 'div' : 'details';
+---
+
+{
+  sections.length > 0 && (
+    <Wrapper class:list={['el-toc', float ? 'el-toc--float' : 'el-toc--disclosure']}>
+      {!float && <summary class="el-label">Contents</summary>}
+      <nav aria-label="Contents">
+        {float && (
+          <span class="el-label" aria-hidden="true">
+            Contents
+          </span>
+        )}
+        <ol>
+          {sections.map(({ heading, children }, i) => (
+            <li>
+              <a href={`#${heading.slug}`}>
+                <span class="el-toc__number">{number(i)}</span>
+                <span>{heading.text}</span>
+              </a>
+              {children.length > 0 && (
+                <ol>
+                  {children.map((child) => (
+                    <li>
+                      <a href={`#${child.slug}`}>{child.text}</a>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </Wrapper>
+  )
+}
+
+<script>
+  import '../client/toc.ts';
+</script>

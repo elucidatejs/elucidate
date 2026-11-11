@@ -1,0 +1,48 @@
+---
+import '../styles/article.css';
+import '../styles/toc.css';
+import type { MarkdownHeading } from 'astro';
+import Abstract from '../components/Abstract.astro';
+import ArticleHero from '../components/ArticleHero.astro';
+import Byline from '../components/Byline.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import type { Article } from '../lib/articles.ts';
+import type { Hero } from '../lib/heroes.ts';
+import Base from './Base.astro';
+
+export interface Props {
+  article: Article;
+  headings: MarkdownHeading[];
+  hero?: Hero | undefined;
+}
+
+const { article, headings, hero } = Astro.props;
+const { data } = article;
+const banner = {
+  draft: 'Draft: visible in development only, not built for production.',
+  review: 'In review: not listed or indexed. Share this link with reviewers.',
+  published: undefined,
+}[data.status];
+---
+
+<Base title={data.title} description={data.description} noindex={data.status === 'review'}>
+  <article class="el-article">
+    <header class="el-title-block el-grid">
+      {banner && <p class="el-status el-label" role="note">{banner}</p>}
+      <ArticleHero article={article} hero={hero} />
+      <Byline article={article} />
+      {data.toc && <TableOfContents headings={headings} variant="disclosure" />}
+    </header>
+    {
+      data.abstract && (
+        <div class="el-grid">
+          <Abstract abstract={data.abstract} />
+        </div>
+      )
+    }
+    <div class="el-prose el-grid">
+      {data.toc && <TableOfContents headings={headings} variant="float" />}
+      <slot />
+    </div>
+  </article>
+</Base>

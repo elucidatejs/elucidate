@@ -1,0 +1,43 @@
+/* Named-line grid shared by articles and pages (docs/spec.md §12.5). Children default to `text`. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.base {
+  .el-grid {
+    --el-col-text: min(var(--el-width-text), 100% - 2 * var(--el-gutter));
+    --el-col-wide: min(var(--el-width-wide), 100% - 2 * var(--el-gutter));
+    --el-col-page: min(var(--el-width-page), 100% - 2 * var(--el-gutter));
+    display: grid;
+    grid-template-columns:
+      [screen-start] minmax(0, 1fr)
+      [page-start] calc((var(--el-col-page) - var(--el-col-wide)) / 2)
+      [wide-start] calc((var(--el-col-wide) - var(--el-col-text)) / 2)
+      [text-start] var(--el-col-text)
+      [text-end] calc((var(--el-col-wide) - var(--el-col-text)) / 2)
+      [wide-end] calc((var(--el-col-page) - var(--el-col-wide)) / 2)
+      [page-end] minmax(0, 1fr)
+      [screen-end];
+  }
+
+  .el-grid > * {
+    grid-column: text;
+    min-width: 0;
+  }
+
+  .el-grid > .el-width-wide {
+    grid-column: wide;
+  }
+  .el-grid > .el-width-page {
+    grid-column: page;
+  }
+  .el-grid > .el-width-screen {
+    grid-column: screen;
+  }
+
+  /* Phones: wide and page content goes edge to edge. */
+  @media (max-width: 639px) {
+    .el-grid {
+      --el-col-wide: 100%;
+      --el-col-page: 100%;
+    }
+  }
+}

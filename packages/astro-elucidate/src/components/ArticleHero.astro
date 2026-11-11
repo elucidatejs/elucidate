@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+import type { Article } from '../lib/articles.ts';
+import { formatDay, isoDay } from '../lib/format.ts';
+import type { Hero } from '../lib/heroes.ts';
+
+export interface Props {
+  article: Article;
+  hero?: Hero | undefined;
+}
+
+const { article, hero } = Astro.props;
+const { data } = article;
+const HeroComponent = hero?.component as ((props: Record<string, never>) => unknown) | undefined;
+const heroClass = `el-hero el-width-${data.hero.width}${data.hero.position === 'above' ? ' el-hero--above' : ''}`;
+---
+
+<p class="el-label el-eyebrow">
+  {data.category && `${data.category} — `}<time datetime={isoDay(data.date)}>{formatDay(data.date)}</time>
+</p>
+<h1 class="el-title">{data.title}</h1>
+<p class="el-dek">{data.description}</p>
+{
+  hero && (
+    <div class={heroClass}>
+      {HeroComponent && <HeroComponent />}
+      {hero.image && <Image src={hero.image} alt={data.hero.alt ?? ''} widths={[640, 1200, 2400]} sizes="100vw" />}
+    </div>
+  )
+}

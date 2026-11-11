@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/paths.ts';
+---
+
+<Base title="Page not found" noindex>
+  <div class="el-title-block el-grid">
+    <p class="el-label el-eyebrow">404</p>
+    <h1 class="el-title">Page not found</h1>
+    <p class="el-dek">The page you were looking for does not exist or has moved.</p>
+    <p><a class="el-arrow" href={withBase('/')}>Go to the homepage</a></p>
+  </div>
+</Base>

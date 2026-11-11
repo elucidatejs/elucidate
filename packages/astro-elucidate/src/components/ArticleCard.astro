@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+import config from 'virtual:elucidate/config';
+import type { Article } from '../lib/articles.ts';
+import { formatMonth, isoDay } from '../lib/format.ts';
+import { heroFor } from '../lib/heroes.ts';
+import { articlePath } from '../lib/paths.ts';
+
+export interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { data } = article;
+const thumbnail = config.index.thumbnails ? heroFor(article.id)?.image : undefined;
+---
+
+<li class="el-card">
+  <p class="el-label el-card__label">
+    {data.category && `${data.category} — `}<time datetime={isoDay(data.date)}>{formatMonth(data.date)}</time>
+  </p>
+  <h2 class="el-card__title"><a href={articlePath(article.id)}>{data.title}</a></h2>
+  <p class="el-card__description">{data.description}</p>
+  {thumbnail && <Image class="el-card__thumb" src={thumbnail} alt="" width={320} />}
+</li>
