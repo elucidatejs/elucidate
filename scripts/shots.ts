@@ -61,6 +61,15 @@ try {
         });
         // Astro's toolbar on the dev server is not part of the site.
         await page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' });
+        // Lazy images below the window would be blank in a full-page shot.
+        await page.evaluate(() =>
+          Promise.all(
+            [...document.images].map((img) => {
+              img.loading = 'eager';
+              return img.decode().catch(() => {});
+            }),
+          ),
+        );
         const name =
           path
             .replace(/^\/+|\/+$/g, '')
