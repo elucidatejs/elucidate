@@ -15,10 +15,16 @@
     line-height: 1.6;
     color: var(--el-text-muted);
   }
+  /* Label and text share their first baseline, whatever the text starts with. */
   @media (min-width: 1024px) {
     .el-appendix__section {
       grid-template-columns: 180px minmax(0, 1fr);
+      align-items: baseline;
     }
+  }
+  /* Prose spacing would push author-written sections down; the grid gap spaces them instead. */
+  .el-appendix__section > * {
+    margin: 0;
   }
   @media (max-width: 639px) {
     .el-appendix__section {
@@ -46,8 +52,6 @@
   }
 
   .el-appendix__section .el-appendix__heading {
-    margin: 0;
-    padding-block-start: 0.15em;
     font-family: var(--el-font-mono);
     font-size: var(--el-text-label);
     font-weight: 400;
