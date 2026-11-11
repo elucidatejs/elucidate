@@ -1,0 +1,28 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import '../styles/blocks.css';
+
+type Common = {
+  /** `primary` is a filled pill, `secondary` an outlined one. */
+  variant?: 'primary' | 'secondary';
+};
+
+/** With `href`, the button is a link styled as a button; prefer a plain link for navigation. */
+export type Props = Common &
+  ((HTMLAttributes<'a'> & { href: string }) | (HTMLAttributes<'button'> & { href?: never }));
+
+const { variant = 'primary', class: className, ...rest } = Astro.props;
+const classes = ['el-button', `el-button--${variant}`, className];
+---
+
+{
+  'href' in rest && rest.href !== undefined ? (
+    <a class:list={classes} {...(rest as HTMLAttributes<'a'>)}>
+      <slot />
+    </a>
+  ) : (
+    <button class:list={classes} type="button" {...(rest as HTMLAttributes<'button'>)}>
+      <slot />
+    </button>
+  )
+}

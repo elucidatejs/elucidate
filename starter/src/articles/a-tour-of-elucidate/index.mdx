@@ -28,6 +28,10 @@ reviews:
 hero: { width: page, position: below }
 ---
 
+import './tour.css';
+import momentumFallback from './figures/momentum.svg';
+import MomentumExplorer from './figures/MomentumExplorer.astro';
+
 Elucidate is built for articles that explain something carefully, in the spirit of the Distill
 journal [@goh2017]. An article is a folder with an `index.mdx` file, written in Markdown with
 components where you need them. Everything around the text, from the byline to the appendix, comes
@@ -157,6 +161,95 @@ anyone who wants it, a longer description. @fig:widths shows the four widths:
 Content defaults to the text column. Set `width` to `wide`, `page` or `screen` for more room, or
 `margin` to place a small figure beside the text on wide screens. Cross-references such as
 @fig:widths, @tbl:widths, @eq:momentum and @sec:math become links with the right number.
+
+### Interactive figures
+
+A figure can hold any component. @fig:momentum is an Astro component with a `<script>` in plain
+TypeScript, so it needs no framework: drag the slider, pick a step size, and hover over a step or
+focus the plot and use the arrow keys.
+
+<Figure
+  id="fig:momentum"
+  width="wide"
+  caption="Gradient descent with and without momentum on a long, narrow valley."
+  description="Contour lines of an elongated bowl with its minimum on the right. Two paths start at the far left. Without momentum, the path creeps along the valley floor in small steps. With momentum, it travels much further per step, overshoots the minimum slightly and settles there in far fewer steps. Below the plot, a sentence gives the number of steps each method needs."
+  fallback={momentumFallback}
+>
+  <MomentumExplorer name="momentum" />
+</Figure>
+
+Its colors come from the data palette, eight colors chosen to stay apart for readers with color
+vision deficiencies, with separate versions for light and dark mode. Read them in a script, and
+redraw when the reader switches themes:
+
+```ts
+import { onThemeChange, palette } from 'astro-elucidate/palette';
+
+// colors.categorical[0], colors.sequential(0.5), colors.grid, …
+let colors = palette();
+onThemeChange(() => {
+  colors = palette();
+  draw();
+});
+```
+
+In CSS, use the tokens `--el-data-1` to `--el-data-8` directly. The `description` is read by screen
+readers and shown behind the "Description" button; the `fallback` image replaces the figure in
+print and when JavaScript is off. The sliders, segmented buttons and switch are styled by the
+classes `el-slider`, `el-segmented` and `el-toggle`.
+
+### Overlays
+
+Some tools need the whole window. An `Overlay` opens as a dialog, a drawer or, like this one, over
+the full window. Its `id` becomes the URL: [a link to `#explorer`](#explorer) opens it as well,
+so a view can be shared.
+
+<Overlay id="explorer" title="Momentum explorer" size="full" trigger="Open the explorer">
+  <MomentumExplorer name="explorer" size="large" />
+</Overlay>
+
+Inside it, the tooltip of each step is a popover, so it floats above the overlay without any
+`z-index`. Esc or the close button closes the overlay and returns focus to the button.
+
+## Asides, notes and wide content
+
+<Aside>An aside like this one sits in the right margin on wide screens and inline on narrow ones.</Aside>
+
+`Aside` holds a remark beside the text, without a number. Put it just before the paragraph it
+belongs to. `Note` sets a short passage apart in the column itself:
+
+<Note label="Note">
+  Momentum helps most on ill-conditioned problems, where some directions are much steeper than
+  others.
+</Note>
+
+`Block` puts any content at a wider width, like this row of the eight data colors at page width:
+
+<Block width="page">
+  <div class="tour-swatches">
+    <span style="--c: var(--el-data-1)">1</span>
+    <span style="--c: var(--el-data-2)">2</span>
+    <span style="--c: var(--el-data-3)">3</span>
+    <span style="--c: var(--el-data-4)">4</span>
+    <span style="--c: var(--el-data-5)">5</span>
+    <span style="--c: var(--el-data-6)">6</span>
+    <span style="--c: var(--el-data-7)">7</span>
+    <span style="--c: var(--el-data-8)">8</span>
+  </div>
+</Block>
+
+### Your own components
+
+Components exported from `src/components/index.ts` work in every article without an import, like
+this one from the starter:
+
+<Definition term="Momentum">
+  An update that adds a fraction β of the previous step to the current gradient step, so that
+  steps in a consistent direction build up speed.
+</Definition>
+
+During development, `/components/` shows every built-in component and every one of yours, each
+with an example and its source.
 
 ## Citations and footnotes
 

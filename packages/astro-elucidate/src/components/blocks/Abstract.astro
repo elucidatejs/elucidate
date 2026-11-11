@@ -1,0 +1,15 @@
+---
+import '../../styles/article.css';
+import Abstract from '../Abstract.astro';
+import { articleContext } from './context.ts';
+
+const { article } = articleContext(Astro.locals, 'Abstract');
+---
+
+{
+  article.data.abstract && (
+    <div class="el-grid">
+      <Abstract abstract={article.data.abstract} />
+    </div>
+  )
+}

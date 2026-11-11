@@ -1,4 +1,4 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { render, renderMdx } from './markdown-helpers.ts';
 
 it('numbers labeled display equations and links references to them', async () => {
@@ -131,9 +131,32 @@ it('imports built-in components that an MDX file uses, unless it imports them it
   const esm = tree.children[0] as unknown as { type: string; value: string };
   expect(esm.type).toBe('mdxjsEsm');
   expect(esm.value).toBe(
-    "import { Figure, Acknowledgments } from 'astro-elucidate/components';".replaceAll("'", '"'),
+    "import { Acknowledgments, Figure } from 'astro-elucidate/components';".replaceAll("'", '"'),
   );
 
   const own = await renderMdx("import Figure from './MyFigure.astro'\n\n<Figure>x</Figure>");
   expect(own.tree.children.filter((n) => n.type === 'mdxjsEsm')).toHaveLength(1);
+});
+
+it('warns when an interactive figure has no description', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  await renderMdx('<Figure id="fig:live">\n  <Plot client:visible />\n</Figure>');
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining('Figure fig:live'));
+  warn.mockClear();
+  await renderMdx(
+    '<Figure id="fig:live" description="A plot.">\n  <Plot client:visible />\n</Figure>',
+  );
+  await renderMdx('<Figure id="fig:still">\n  <Plot />\n</Figure>');
+  expect(warn).not.toHaveBeenCalled();
+  warn.mockRestore();
+});
+
+it('lifts a one-line block component out of its paragraph', async () => {
+  const { tree } = await renderMdx(
+    '<Aside>A *short* note.</Aside>\n\nText <Button>Go</Button> here.',
+  );
+  const [aside, paragraph] = tree.children.filter((n) => n.type !== 'mdxjsEsm');
+  expect(aside).toMatchObject({ type: 'mdxJsxFlowElement', name: 'Aside' });
+  // Inline components such as Button stay where they are.
+  expect(paragraph?.type).toBe('paragraph');
 });

@@ -1,10 +1,8 @@
 ---
-import type { Article } from '../lib/articles.ts';
 import { formatDay, isoDay } from '../lib/format.ts';
+import type { BylineProps } from '../types.ts';
 
-export interface Props {
-  article: Article;
-}
+export type Props = BylineProps;
 
 const { authors, affiliations, date, updated, doi } = Astro.props.article.data;
 const withAffiliations = authors.some((author) => author.affiliations.length > 0);

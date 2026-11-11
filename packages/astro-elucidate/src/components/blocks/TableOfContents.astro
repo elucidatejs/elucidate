@@ -1,0 +1,11 @@
+---
+import '../../styles/toc.css';
+import TableOfContents from '../TableOfContents.astro';
+import { articleContext } from './context.ts';
+
+const { plugin } = articleContext(Astro.locals, 'TableOfContents');
+---
+
+<div class="el-grid el-toc-block">
+  <TableOfContents headings={plugin.headings} variant="disclosure" />
+</div>

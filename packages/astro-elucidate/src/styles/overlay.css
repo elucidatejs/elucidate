@@ -1,0 +1,131 @@
+/* <Overlay>: a native modal <dialog> (docs/spec.md §8.6, §12.6). Tools inside it that float
+   (tooltips, menus) use the Popover API, which puts them in the top layer above the dialog. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-overlay {
+    flex-direction: column;
+    width: min(720px, 100vw - 2 * var(--el-gutter));
+    max-width: none;
+    max-height: min(85vh, 100dvh - 2 * var(--el-gutter));
+    padding: 0;
+    border: 0;
+    border-radius: var(--el-radius-md);
+    background: var(--el-bg);
+    color: var(--el-text);
+    box-shadow: var(--el-shadow-overlay);
+    overscroll-behavior: contain;
+  }
+  .el-overlay[open] {
+    display: flex;
+  }
+  .el-overlay::backdrop {
+    background: var(--el-backdrop);
+  }
+  .el-overlay--drawer {
+    inset: 0 0 0 auto;
+    width: min(560px, 100vw);
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border-radius: var(--el-radius-md) 0 0 var(--el-radius-md);
+  }
+  .el-overlay--full {
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  /* No page scroll behind an open overlay. */
+  :root:has(.el-overlay[open]) {
+    overflow: hidden;
+  }
+
+  .el-overlay__bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--el-space-4);
+    min-height: 56px;
+    padding: var(--el-space-2) var(--el-space-2) var(--el-space-2) var(--el-space-5);
+    border-block-end: 1px solid var(--el-border);
+  }
+  .el-overlay__title {
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-ui);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .el-overlay__close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: var(--el-radius-pill);
+    background: none;
+    color: var(--el-text-muted);
+    cursor: pointer;
+  }
+  .el-overlay__close:hover {
+    background: var(--el-surface);
+    color: var(--el-text);
+  }
+  /* Overlays usually sit in the article body; prose spacing does not apply to their parts. */
+  .el-overlay .el-overlay__title,
+  .el-overlay .el-overlay__close {
+    margin: 0;
+  }
+  .el-overlay__body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--el-space-5);
+    font-family: var(--el-font-body);
+    font-size: var(--el-text-body);
+    line-height: 1.6;
+  }
+  .el-overlay__body > * + * {
+    margin-block-start: 1em;
+  }
+
+  /* Opening: a short fade, and the drawer slides in. */
+  .el-overlay[open],
+  .el-overlay[open]::backdrop {
+    transition:
+      opacity var(--el-duration) var(--el-ease),
+      translate var(--el-duration) var(--el-ease);
+  }
+  @starting-style {
+    .el-overlay[open],
+    .el-overlay[open]::backdrop {
+      opacity: 0;
+    }
+    .el-overlay--drawer[open] {
+      translate: 24px 0;
+    }
+  }
+
+  /* Without JavaScript the trigger cannot open the dialog, so the content shows in place. */
+  @media (scripting: none) {
+    .el-overlay {
+      position: static;
+      display: block;
+      width: auto;
+      max-height: none;
+      margin-block: var(--el-space-6);
+      border: 1px solid var(--el-border);
+      box-shadow: none;
+    }
+    .el-overlay__close,
+    .el-overlay-trigger {
+      display: none;
+    }
+  }
+}

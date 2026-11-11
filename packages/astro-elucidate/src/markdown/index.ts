@@ -1,20 +1,22 @@
 import type { RehypePlugins, RemarkPlugins } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import type { ElucidateConfig } from '../config.ts';
-import { remarkAutoImport } from './auto-import.ts';
+import { builtInComponents, remarkAutoImport } from './auto-import.ts';
 import { remarkCitations } from './citations.ts';
 import { remarkCrossref } from './crossref.ts';
 import { remarkDefaultLayout } from './default-layout.ts';
 import { rehypeFootnotes } from './footnotes.ts';
 import { rehypeImages } from './images.ts';
 import { rehypeMath, remarkDollarSigns } from './math.ts';
+import { remarkMdxBlocks } from './mdx-blocks.ts';
 import { remarkNumbering } from './numbering.ts';
 
 /**
  * The Markdown pipeline (spec §6.3). Order matters:
  *
  * remark
- * 1. remark-math parses `$…$` and `$$…$$`; dollar-signs turns prices like `$5 and $10` back into text.
+ * 1. remark-math parses `$…$` and `$$…$$`; dollar-signs turns prices like `$5 and $10` back into text;
+ *    mdx-blocks lifts one-line block components such as `<Aside>…</Aside>` out of their paragraph.
  * 2. numbering assigns numbers to sections, figures, tables and labeled equations, and collects
  *    the labels; it needs the math nodes.
  * 3. crossref turns `@fig:…` and friends into links; it needs the labels.
@@ -29,16 +31,27 @@ import { remarkNumbering } from './numbering.ts';
 export function markdownPlugins(
   config: ElucidateConfig,
   pagesDir: string,
+  /** Components exported by the site's `src/components/index.ts`. */
+  userComponents: string[] = [],
 ): { remarkPlugins: RemarkPlugins; rehypePlugins: RehypePlugins } {
   return {
     remarkPlugins: [
       remarkMath,
       remarkDollarSigns,
+      remarkMdxBlocks,
       [remarkNumbering, { sections: config.numbering.sections }],
       remarkCrossref,
       remarkCitations,
       [remarkDefaultLayout, { pagesDir, layout: 'astro-elucidate/layouts/Page.astro' }],
-      [remarkAutoImport, { source: 'astro-elucidate/components' }],
+      [
+        remarkAutoImport,
+        {
+          sources: [
+            { from: 'astro-elucidate/components', names: builtInComponents },
+            { from: 'virtual:elucidate/user-components', names: userComponents },
+          ],
+        },
+      ],
     ],
     rehypePlugins: [[rehypeMath, config.math], rehypeFootnotes, rehypeImages],
   };

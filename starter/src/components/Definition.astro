@@ -1,0 +1,35 @@
+---
+// An example of a site component: a term and its definition, set off from the text.
+interface Props {
+  /** The term being defined. */
+  term: string;
+}
+
+const { term } = Astro.props;
+---
+
+<div class="definition">
+  <p class="definition__label el-label">Definition</p>
+  <p class="definition__term"><dfn>{term}</dfn></p>
+  <div class="definition__body"><slot /></div>
+</div>
+
+<style>
+  .definition {
+    padding-block: var(--el-space-4);
+    border-block: 1px solid var(--el-border);
+  }
+  .definition__label {
+    color: var(--el-text-muted);
+  }
+  .definition__term {
+    margin-block: var(--el-space-2) var(--el-space-1);
+    font-weight: 600;
+  }
+  .definition__term dfn {
+    font-style: normal;
+  }
+  .definition__body :global(p + p) {
+    margin-block-start: 0.6em;
+  }
+</style>

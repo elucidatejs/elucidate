@@ -1,0 +1,9 @@
+---
+import '../../styles/article.css';
+import Byline from '../Byline.astro';
+import { articleContext } from './context.ts';
+
+const { article } = articleContext(Astro.locals, 'Byline');
+---
+
+<div class="el-grid"><Byline article={article} /></div>

@@ -1,0 +1,13 @@
+---
+import '../styles/blocks.css';
+
+export interface Props {
+  /** The column to fill. Below 640px, wide and page run edge to edge. */
+  width?: 'text' | 'wide' | 'page' | 'screen';
+  class?: string;
+}
+
+const { width = 'wide', class: className } = Astro.props;
+---
+
+<div class:list={['el-block', `el-width-${width}`, className]}><slot /></div>

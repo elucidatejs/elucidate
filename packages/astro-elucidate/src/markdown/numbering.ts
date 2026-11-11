@@ -40,6 +40,16 @@ export function attribute(node: JsxElement, name: string): string | true | undef
   return typeof attr.value === 'string' ? attr.value : undefined;
 }
 
+/** Whether an element contains a framework island (a component with a `client:` directive). */
+function hasIsland(node: Node): boolean {
+  let found = false;
+  visit(node, (child: Node) => {
+    if (child.type !== 'mdxJsxFlowElement' && child.type !== 'mdxJsxTextElement') return;
+    if ((child as JsxElement).attributes.some((a) => a.name?.startsWith('client:'))) found = true;
+  });
+  return found;
+}
+
 function setAttribute(node: JsxElement, name: string, value: string): void {
   node.attributes = node.attributes.filter((a) => a.name !== name);
   node.attributes.push({ type: 'mdxJsxAttribute', name, value });
@@ -87,7 +97,17 @@ export function remarkNumbering({ sections }: Options) {
 
       if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
         const element = node as JsxElement;
-        if (element.name === 'Figure') numberFigure(element);
+        if (element.name === 'Figure') {
+          if (attribute(element, 'description') === undefined && hasIsland(element)) {
+            const id = attribute(element, 'id');
+            warn(
+              file,
+              typeof id === 'string' ? `Figure ${id}` : 'Figure',
+              'This figure is interactive. Describe it with description="…" for screen reader users and anyone who cannot use it.',
+            );
+          }
+          numberFigure(element);
+        }
         if (element.name === 'AppendixSection') {
           const id = attribute(element, 'id');
           const title = attribute(element, 'title');

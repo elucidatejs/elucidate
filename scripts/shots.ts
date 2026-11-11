@@ -6,10 +6,21 @@ import { chromium } from '@playwright/test';
 import { base } from '../e2e/site.ts';
 
 const port = 4323;
+const devPort = 4325;
 const origin = `http://localhost:${port}${base}`;
+const devOrigin = `http://localhost:${devPort}${base}`;
 const outDir = '.screenshots';
-// Paths relative to the site's base. Extend as milestones add pages (/components/, an overlay).
-const defaultPages = ['', 'research/a-tour-of-elucidate/', 'research/hello-world/', 'about/'];
+// Paths relative to the site's base. The overlay is opened by its hash; the component overview
+// exists only on the dev server (showcase: 'dev').
+const defaultPages = [
+  '',
+  'research/a-tour-of-elucidate/',
+  'research/a-tour-of-elucidate/#explorer',
+  'research/hello-world/',
+  'about/',
+  'components/',
+];
+const onDevServer = (path: string) => path.replace(/^\/+/, '').startsWith('components/');
 const widths = [375, 1440];
 const themes = ['light', 'dark'] as const;
 
@@ -20,9 +31,20 @@ execSync('pnpm --filter elucidate-starter build', { stdio: 'inherit' });
 // `--ignore-lock` keeps `astro preview` in the foreground (Astro backgrounds it when run by an agent).
 const preview = ['--filter', 'elucidate-starter', 'preview', '--port', `${port}`, '--ignore-lock'];
 const server = spawn('pnpm', preview, { detached: true, stdio: 'ignore' });
+const dev = pages.some(onDevServer)
+  ? spawn(
+      'pnpm',
+      ['--filter', 'elucidate-starter', 'dev', '--port', `${devPort}`, '--ignore-lock'],
+      {
+        detached: true,
+        stdio: 'ignore',
+      },
+    )
+  : undefined;
 
 try {
   await waitFor(origin);
+  if (dev) await waitFor(devOrigin);
   mkdirSync(outDir, { recursive: true });
   const browser = await chromium.launch();
   for (const path of pages) {
@@ -33,11 +55,22 @@ try {
           colorScheme: theme,
         });
         const page = await context.newPage();
-        await page.goto(new URL(path.replace(/^\/+/, ''), origin).href, {
+        const from = onDevServer(path) ? devOrigin : origin;
+        await page.goto(new URL(path.replace(/^\/+/, ''), from).href, {
           waitUntil: 'networkidle',
         });
-        const name = path.replace(/^\/+|\/+$/g, '').replaceAll('/', '_') || 'home';
-        await page.screenshot({ path: `${outDir}/${name}-${width}-${theme}.png`, fullPage: true });
+        // Astro's toolbar on the dev server is not part of the site.
+        await page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' });
+        const name =
+          path
+            .replace(/^\/+|\/+$/g, '')
+            .replace('/#', '_')
+            .replaceAll('/', '_') || 'home';
+        // An open overlay covers the window, so it gets a window-sized shot.
+        await page.screenshot({
+          path: `${outDir}/${name}-${width}-${theme}.png`,
+          fullPage: !path.includes('#'),
+        });
         await context.close();
       }
     }
@@ -46,6 +79,7 @@ try {
   console.log(`Saved ${pages.length * widths.length * themes.length} screenshots to ${outDir}/`);
 } finally {
   if (server.pid) process.kill(-server.pid);
+  if (dev?.pid) process.kill(-dev.pid);
 }
 
 async function waitFor(url: string, timeoutMs = 30_000): Promise<void> {

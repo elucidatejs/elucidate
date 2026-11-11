@@ -2,17 +2,9 @@
 import { Font } from 'astro:assets';
 import config from 'virtual:elucidate/config';
 import { withBase } from '../lib/paths.ts';
+import type { HeadProps } from '../types.ts';
 
-export interface Props {
-  title: string;
-  description?: string;
-  /** Adds `robots: noindex`, e.g. for articles in review. */
-  noindex?: boolean;
-  /** Open Graph type. */
-  ogType?: 'website' | 'article';
-  /** Absolute URL of the social preview image (an article's image hero). */
-  image?: string | undefined;
-}
+export type Props = HeadProps;
 
 const {
   title,

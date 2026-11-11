@@ -45,11 +45,8 @@ fonts, so you don't set those yourself.
 | `math.macros` | `{}` | TeX macros shared by both engines, e.g. `{ '\\R': '\\mathbb{R}', '\\norm': '\\left\\lVert #1 \\right\\rVert' }`. |
 | `numbering.sections` | `false` | Number sections (1, 1.1, …) in headings, the table of contents and cross-references. |
 | `index.thumbnails` | `false` | Show a small thumbnail in the index for articles with an image hero. |
-| `showcase` | `'dev'` | Component overview page: `'dev'`, `'public'` or `'off'`. |
-| `overrides` | `{}` | Replace structural components, e.g. `{ Byline: './src/overrides/Byline.astro' }`. |
-
-During v0.1 development, `showcase` and `overrides` are validated but take effect in later
-milestones (see the "v0.1 tracking" issue).
+| `showcase` | `'dev'` | The component overview at `/components/`: on the dev server only (`'dev'`), also in the built site (`'public'`, kept out of search engines), or not at all (`'off'`). |
+| `overrides` | `{}` | Replace structural components, e.g. `{ Byline: './src/overrides/Byline.astro' }`; see [customizing.md](customizing.md#6-overrides). A path that does not exist is an error. |
 
 ## Errors
 

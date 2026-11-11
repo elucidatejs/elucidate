@@ -73,13 +73,12 @@
     position: fixed;
     inset: auto;
     margin: 0;
-    max-width: min(420px, 100vw - 24px);
+    max-width: min(360px, 100vw - 24px);
     padding: var(--el-space-4);
     border: 1px solid var(--el-border);
-    border-radius: var(--el-radius-md);
-    background: var(--el-bg);
+    border-radius: var(--el-radius-sm);
+    background: var(--el-surface);
     color: var(--el-text);
-    box-shadow: var(--el-shadow-overlay);
     font-family: var(--el-font-sans);
     font-size: var(--el-text-small);
     line-height: 1.5;

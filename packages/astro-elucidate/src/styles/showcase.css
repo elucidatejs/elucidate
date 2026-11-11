@@ -1,0 +1,66 @@
+/* The component overview page, /components/ (docs/spec.md §10.5). */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-showcase__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--el-space-2) var(--el-space-4);
+    padding: 0;
+    list-style: none;
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+  }
+  .el-showcase__nav li {
+    margin: 0;
+  }
+  /* Wide content runs edge to edge on phones; the links keep the gutter. */
+  @media (max-width: 639px) {
+    .el-showcase__nav {
+      padding-inline: var(--el-gutter);
+    }
+  }
+
+  /* Each section spans the page and lays its parts on the article grid, so examples with a
+     width (Block, Figure) show it. */
+  .el-prose > .el-showcase {
+    grid-column: screen;
+    grid-template-columns: subgrid;
+    margin-block-start: var(--el-space-8);
+    padding-block-start: var(--el-space-6);
+    border-block-start: 1px solid var(--el-border);
+  }
+  .el-showcase > .el-showcase__example {
+    grid-column: screen;
+    grid-template-columns: subgrid;
+    margin-block: var(--el-space-5);
+  }
+  .el-showcase__example > * + * {
+    margin-block-start: 1em;
+  }
+  .el-prose .el-showcase__header h2 {
+    margin-block-start: 0;
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-ui);
+    font-weight: 500;
+  }
+  .el-showcase__header p {
+    margin-block-start: var(--el-space-2);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    color: var(--el-text-muted);
+  }
+  .el-showcase__docs {
+    white-space: nowrap;
+  }
+  .el-showcase__source summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    color: var(--el-text-muted);
+    cursor: pointer;
+  }
+  .el-showcase__source pre {
+    margin-block-start: var(--el-space-3);
+  }
+}

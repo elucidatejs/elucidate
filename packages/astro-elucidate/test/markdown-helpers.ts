@@ -8,13 +8,14 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
-import { remarkAutoImport } from '../src/markdown/auto-import.ts';
+import { builtInComponents, remarkAutoImport } from '../src/markdown/auto-import.ts';
 import { remarkCitations } from '../src/markdown/citations.ts';
 import { remarkCrossref } from '../src/markdown/crossref.ts';
 import { rehypeFootnotes } from '../src/markdown/footnotes.ts';
 import { rehypeImages } from '../src/markdown/images.ts';
 import { rehypeMath, remarkDollarSigns } from '../src/markdown/math.ts';
 import type { Engine } from '../src/markdown/math-engines.ts';
+import { remarkMdxBlocks } from '../src/markdown/mdx-blocks.ts';
 import { remarkNumbering } from '../src/markdown/numbering.ts';
 import { type PluginData, pluginData } from '../src/markdown/shared.ts';
 
@@ -67,9 +68,12 @@ export async function renderMdx(mdx: string, options: Options = {}) {
     .use(remarkMdx)
     .use(remarkMath)
     .use(remarkDollarSigns)
+    .use(remarkMdxBlocks)
     .use(remarkNumbering, { sections: options.sections ?? false })
     .use(remarkCrossref)
-    .use(remarkAutoImport, { source: 'astro-elucidate/components' });
+    .use(remarkAutoImport, {
+      sources: [{ from: 'astro-elucidate/components', names: builtInComponents }],
+    });
   const vfile = file(mdx, options);
   const tree = (await processor.run(processor.parse(vfile), vfile)) as Root;
   return { tree, data: pluginData(vfile) };

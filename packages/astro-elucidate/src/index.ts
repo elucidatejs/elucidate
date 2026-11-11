@@ -10,30 +10,44 @@ import {
   parseConfig,
   siteAndBase,
 } from './config.ts';
+import { builtInComponents } from './markdown/auto-import.ts';
 import { shikiConfig } from './markdown/code-theme.ts';
 import { markdownPlugins } from './markdown/index.ts';
 import { mathStylesModule } from './markdown/math-engines.ts';
+import { overridesPlugin, resolveOverrides } from './overrides.ts';
+import { bespokeBlocks, type Registry, readRegistry } from './registry.ts';
+import { showcaseModule } from './showcase.ts';
 
 export type { ElucidateConfig, ElucidateUserConfig } from './config.ts';
 
 /**
- * The Elucidate Astro integration: validates the site settings, sets up Markdown/MDX, fonts and
- * routes (docs/spec.md §6.1).
+ * The Elucidate Astro integration: validates the site settings, sets up Markdown/MDX, fonts,
+ * overrides, the site's component registry and routes (docs/spec.md §6.1).
  */
 export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegration {
   return {
     name: 'astro-elucidate',
     hooks: {
-      'astro:config:setup': ({ config: astro, updateConfig, injectRoute }) => {
+      'astro:config:setup': ({
+        config: astro,
+        command,
+        updateConfig,
+        injectRoute,
+        addWatchFile,
+      }) => {
         const config = parseConfig(userConfig);
         const pages = new URL('pages/', astro.srcDir);
         const indexPage = findPage(pages, 'index');
         checkHome(config, indexPage);
+        const overrides = resolveOverrides(config.overrides, astro.root);
+        const registry = readRegistry(astro.srcDir, [...builtInComponents, ...bespokeBlocks]);
+        // The registry decides what MDX imports automatically, so a change restarts the server.
+        addWatchFile(registry.file ?? new URL('components/index.ts', astro.srcDir));
 
         updateConfig({
           ...siteAndBase(config.url),
           markdown: {
-            processor: unified(markdownPlugins(config, fileURLToPath(pages))),
+            processor: unified(markdownPlugins(config, fileURLToPath(pages), registry.names)),
             shikiConfig,
           },
           integrations: astro.integrations.some((i) => i.name === '@astrojs/mdx') ? [] : [mdx()],
@@ -41,7 +55,9 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
             font('Inter', '--el-font-inter', ['400 600'], ['system-ui', 'sans-serif']),
             font('JetBrains Mono', '--el-font-jetbrains-mono', ['400', '500'], ['monospace']),
           ],
-          vite: { plugins: [virtualModules(config, new URL('styles/theme.css', astro.srcDir))] },
+          vite: {
+            plugins: [virtualModules(config, astro.srcDir, registry), overridesPlugin(overrides)],
+          },
         });
 
         const articles = `/${config.routes.articles}`;
@@ -51,6 +67,9 @@ export default function elucidate(userConfig: ElucidateUserConfig): AstroIntegra
         route(`${articles}/[slug]`, 'article.astro');
         route(`${articles}/tag/[tag]`, 'tag.astro');
         if (!findPage(pages, '404')) route('/404', '404.astro');
+        const showcase =
+          config.showcase === 'public' || (config.showcase === 'dev' && command === 'dev');
+        if (showcase && !findPage(pages, 'components')) route('/components', 'components.astro');
       },
     },
   };
@@ -92,13 +111,20 @@ function checkHome(config: ElucidateConfig, indexPage: string | undefined): void
   }
 }
 
-/** Exposes the validated config, the optional user stylesheet and math styles as virtual modules. */
-function virtualModules(config: ElucidateConfig, themeCss: URL) {
+/**
+ * Exposes the validated config, the optional user stylesheet, math styles, the site's components
+ * and the component overview's examples as virtual modules.
+ */
+function virtualModules(config: ElucidateConfig, srcDir: URL, registry: Registry) {
+  const themeCss = new URL('styles/theme.css', srcDir);
   const modules: Record<string, () => string | Promise<string>> = {
     'virtual:elucidate/config': () => `export default ${JSON.stringify(config)};`,
     'virtual:elucidate/user-styles': () =>
       existsSync(themeCss) ? `import ${JSON.stringify(fileURLToPath(themeCss))};` : '',
     'virtual:elucidate/math-styles': () => mathStylesModule(config.math.engine, config.math.macros),
+    'virtual:elucidate/user-components': () =>
+      registry.file ? `export * from ${JSON.stringify(registry.file.replaceAll('\\', '/'))};` : '',
+    'virtual:elucidate/showcase': () => showcaseModule(registry.names, srcDir),
   };
   return {
     name: 'astro-elucidate:virtual-modules',

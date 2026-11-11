@@ -4,6 +4,8 @@ import { expect, type Page } from '@playwright/test';
 /** Fails with the list of violations if axe finds any (WCAG 2.2 AA, docs/spec.md §13.1). */
 export async function expectNoAxeViolations(page: Page): Promise<void> {
   const { violations } = await new AxeBuilder({ page })
+    // Astro's toolbar on the dev server is not part of the site.
+    .exclude('astro-dev-toolbar')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
     .analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(', ')}`)).toEqual([]);

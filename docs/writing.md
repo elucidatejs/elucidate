@@ -43,6 +43,8 @@ reviews:                                        # optional; listed in the append
 bibliography: refs.bib                          # optional; only if the folder has several .bib files
 hero: { width: page, position: below }          # see "Hero" below
 toc: true                                       # table of contents (default: true)
+layout: article                                 # article (default) | bespoke
+header: true                                    # bespoke only: false leaves out the site header
 ---
 ```
 
@@ -53,7 +55,8 @@ src/articles/gnn/index.mdx → authors[0].orcid
   "1234" is not a valid ORCID. Expected 0000-0000-0000-0000 (last character may be X).
 ```
 
-During v0.1 development, `layout` is validated but used by a later milestone (bespoke layout).
+`layout: bespoke` gives the article a design of its own; see
+[customizing.md](customizing.md#7-per-article).
 
 ## Status
 
@@ -125,6 +128,7 @@ needed in `.mdx` files:
 | `width` | `text` (default), `wide`, `page`, `screen`, or `margin` (beside the text on screens 1280 px and wider). |
 | `caption` | Plain-text caption. |
 | `description` | A longer description for screen readers and anyone who wants it, behind a "Description" disclosure. |
+| `fallback` | A static image, imported or a URL, shown instead of the content in print and without JavaScript. |
 | `credit` | Source of a figure you reuse, e.g. `credit="Goh (2017)"`; shown as "Figure from …". |
 
 For a caption with math, code, links or citations, pass it as a child with `slot="caption"`:
@@ -139,6 +143,44 @@ For a caption with math, code, links or citations, pass it as a child with `slot
 
 </Figure>
 ```
+
+### Interactive figures
+
+A figure can hold any component, interactive ones included. Give it a `description` (a build
+warning reminds you when a figure with a `client:` island has none) and a `fallback` image:
+
+```mdx
+import Explorer from './figures/Explorer.astro';
+import explorerStill from './figures/explorer.png';
+
+<Figure id="fig:explorer" width="wide" caption="Momentum at work."
+  description="Two paths descend a long valley; the one with momentum gets there in fewer steps."
+  fallback={explorerStill}>
+  <Explorer />
+</Figure>
+```
+
+Writing the component itself, its colors and its controls: [customizing.md](customizing.md#5-interactive-figures)
+and [components.md](components.md#the-data-palette).
+
+## Asides, notes, wide content and overlays
+
+```mdx
+<Aside>A remark in the margin on wide screens, inline on narrow ones.</Aside>
+
+<Note label="Caveat">A short passage set apart in the column.</Note>
+
+<Block width="page">Anything that needs more room.</Block>
+
+<Overlay id="explorer" title="Momentum explorer" size="full" trigger="Open the explorer">
+  <Explorer />
+</Overlay>
+```
+
+An overlay opens from its button or from any link to its `id` (`[open it](#explorer)`), and the
+URL then ends in `#explorer`, so the view can be shared. All props are in
+[components.md](components.md); your own components work the same way
+([customizing.md](customizing.md#4-your-own-components)).
 
 ## Cross-references
 

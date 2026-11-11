@@ -1,18 +1,12 @@
 ---
 import config from 'virtual:elucidate/config';
 import { licenseInfo, repositoryLinks } from '../lib/appendix.ts';
-import type { Article } from '../lib/articles.ts';
 import { bibtex, citationText } from '../lib/citation.ts';
 import { formatDay, isoDay } from '../lib/format.ts';
-import type { PluginData } from '../markdown/shared.ts';
+import type { AppendixProps } from '../types.ts';
 import AppendixSection from './AppendixSection.astro';
 
-export interface Props {
-  article: Article;
-  plugin: PluginData;
-  /** The article's canonical URL. */
-  url: string;
-}
+export type Props = AppendixProps;
 
 const { article, plugin, url } = Astro.props;
 const { data } = article;
@@ -87,18 +81,18 @@ const withBackref = (html: string, n: number) =>
       Figures reused from other sources are excluded; their captions say “Figure from …”.
     </p>
   </AppendixSection>
-  <AppendixSection title="Citation">
+  <AppendixSection title="Cite this article">
     <p>For attribution in academic contexts, please cite this work as</p>
     <div class="el-copyable">
       <pre id="el-citation-text">{citationText(data, config.title, url)}</pre>
-      <button class="el-copy" type="button" data-copy="el-citation-text" aria-label="Copy citation" hidden>
+      <button class="el-copy" type="button" data-copy="el-citation-text" data-copy-what="Citation" aria-label="Copy citation" hidden>
         Copy
       </button>
     </div>
     <p>BibTeX citation</p>
     <div class="el-copyable">
       <pre id="el-bibtex">{bibtex(data, config.title, url)}</pre>
-      <button class="el-copy" type="button" data-copy="el-bibtex" aria-label="Copy BibTeX" hidden>
+      <button class="el-copy" type="button" data-copy="el-bibtex" data-copy-what="BibTeX" aria-label="Copy BibTeX" hidden>
         Copy
       </button>
     </div>

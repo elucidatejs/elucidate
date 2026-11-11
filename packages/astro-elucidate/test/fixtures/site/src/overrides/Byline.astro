@@ -1,0 +1,12 @@
+---
+// Wraps the built-in byline instead of replacing it.
+import Original from 'astro-elucidate/components/Byline.astro';
+import type { BylineProps } from 'astro-elucidate/types';
+
+type Props = BylineProps;
+const { article } = Astro.props;
+---
+
+<div class="custom-byline" data-authors={article.data.authors.length}>
+  <Original {...Astro.props} />
+</div>

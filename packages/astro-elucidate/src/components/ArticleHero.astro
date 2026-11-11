@@ -1,13 +1,9 @@
 ---
 import { Image } from 'astro:assets';
-import type { Article } from '../lib/articles.ts';
 import { formatDay, isoDay } from '../lib/format.ts';
-import type { Hero } from '../lib/heroes.ts';
+import type { ArticleHeroProps } from '../types.ts';
 
-export interface Props {
-  article: Article;
-  hero?: Hero | undefined;
-}
+export type Props = ArticleHeroProps;
 
 const { article, hero } = Astro.props;
 const { data } = article;
