@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 220" font-family="ui-monospace, monospace" font-size="12"><title>A sine wave</title>
+  <line x1="40" y1="110" x2="660" y2="110" stroke="#8a8a8a" stroke-opacity="0.6"/>
+  <line x1="40" y1="20" x2="40" y2="200" stroke="#8a8a8a" stroke-opacity="0.6"/>
+  <path d="M40 110 C 92 20, 144 20, 195 110 S 298 200, 350 110 S 453 20, 505 110 S 608 200, 660 110" fill="none" stroke="#0072b2" stroke-width="2.5"/>
+  <text x="48" y="32" fill="#7a7a7a">y = sin(x)</text>
+</svg>

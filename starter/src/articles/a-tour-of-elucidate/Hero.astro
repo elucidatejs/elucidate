@@ -1,0 +1,80 @@
+---
+// The article hero: any Astro component named Hero.astro in the article folder (docs/spec.md §7.4).
+// This one is computed at build time: gradient descent on an ill-conditioned quadratic bowl.
+const width = 1200;
+const height = 420;
+const center = { x: 820, y: 200 };
+const angle = (-8 * Math.PI) / 180;
+const [a, b] = [1, 12]; // curvature along and across the valley
+const step = 0.075;
+
+const toXY = (u: number, v: number) => ({
+  x: center.x + u * Math.cos(angle) - v * Math.sin(angle),
+  y: center.y + u * Math.sin(angle) + v * Math.cos(angle),
+});
+
+const path: { x: number; y: number }[] = [];
+let [u, v] = [-620, 70];
+for (let i = 0; i < 28; i++) {
+  path.push(toXY(u, v));
+  [u, v] = [u * (1 - 2 * a * step), v * (1 - 2 * b * step)];
+}
+const levels = [70, 150, 250, 370, 510, 670, 850, 1050];
+const d = path.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+---
+
+<svg
+  class="tour-hero"
+  viewBox={`0 0 ${width} ${height}`}
+  role="img"
+  aria-label="Contour lines of a long, narrow valley. A path of gradient-descent steps zig-zags across the valley floor toward the minimum on the right."
+>
+  <g class="tour-hero__contours" transform={`rotate(${(angle * 180) / Math.PI} ${center.x} ${center.y})`}>
+    {levels.map((r) => <ellipse cx={center.x} cy={center.y} rx={r} ry={r * Math.sqrt(a / b)} />)}
+  </g>
+  <path class="tour-hero__path" d={d} pathLength="1" />
+  {path.map((p) => <circle class="tour-hero__step" cx={p.x} cy={p.y} r="3.5" />)}
+  <circle class="tour-hero__minimum" cx={center.x} cy={center.y} r="6" />
+</svg>
+
+<style>
+  .tour-hero {
+    --hero-path: light-dark(#d55e00, #f28e4b);
+    width: 100%;
+    height: auto;
+  }
+  .tour-hero__contours {
+    fill: none;
+    stroke: var(--el-text-muted);
+    stroke-opacity: 0.45;
+    stroke-width: 1;
+  }
+  .tour-hero__path {
+    fill: none;
+    stroke: var(--hero-path);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .tour-hero__step {
+    fill: var(--el-bg);
+    stroke: var(--hero-path);
+    stroke-width: 1.5;
+  }
+  .tour-hero__minimum {
+    fill: var(--el-text);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tour-hero__path {
+      stroke-dasharray: 1;
+      animation: tour-hero-draw 2.4s ease-out both;
+    }
+  }
+  @keyframes tour-hero-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

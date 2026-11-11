@@ -1,0 +1,7 @@
+/*
+ * Your theme. Override any --el-* token or add your own CSS here. This file loads last and is not
+ * in a cascade layer, so it always wins over Elucidate's styles without !important.
+ *
+ * :root { --el-width-text: 700px; }
+ * :root[data-theme='dark'] { --el-bg: #000; }
+ */
