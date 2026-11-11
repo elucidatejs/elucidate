@@ -11,12 +11,14 @@ import { rehypeImages } from './images.ts';
 import { rehypeMath, remarkDollarSigns } from './math.ts';
 import { remarkMdxBlocks } from './mdx-blocks.ts';
 import { remarkNumbering } from './numbering.ts';
+import { rehypeTaskLists } from './task-lists.ts';
 
 /**
  * The Markdown pipeline (spec §6.3). Order matters:
  *
  * remark
- * 1. remark-math parses `$…$` and `$$…$$`; dollar-signs turns prices like `$5 and $10` back into text;
+ * 1. remark-math parses `$…$` and `$$…$$`; dollar-signs turns prices like `$5 and $10` back into text
+ *    and a one-line `$$…$$` paragraph into a display equation;
  *    mdx-blocks lifts one-line block components such as `<Aside>…</Aside>` out of their paragraph.
  * 2. numbering assigns numbers to sections, figures, tables and labeled equations, and collects
  *    the labels; it needs the math nodes.
@@ -28,7 +30,8 @@ import { remarkNumbering } from './numbering.ts';
  * 1. math renders equations, so footnotes and sidenotes below contain rendered math.
  * 2. footnotes moves notes to the appendix data and beside their references.
  * 3. images checks alt text and sets lazy loading.
- * 4. base-links puts the site's base path in front of root paths such as `/about/`.
+ * 4. task-lists labels the checkboxes of GFM task lists.
+ * 5. base-links puts the site's base path in front of root paths such as `/about/`.
  */
 export function markdownPlugins(
   config: ElucidateConfig,
@@ -59,6 +62,7 @@ export function markdownPlugins(
       [rehypeMath, config.math],
       rehypeFootnotes,
       rehypeImages,
+      rehypeTaskLists,
       [rehypeBaseLinks, { base: siteAndBase(config.url).base }],
     ],
   };

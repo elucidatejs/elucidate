@@ -51,6 +51,16 @@ describe.each(['katex', 'mathjax'] as const)('%s', (engine) => {
     );
   });
 
+  it('reads $$…$$ alone in a paragraph as a display equation', async () => {
+    const { html } = await render(
+      'Text with $$a$$ inline.\n\n$$ w^{k+1} = w^k \\label{eq:one} $$\n\nSee @eq:one.',
+      { engine },
+    );
+    expect(html).toContain('<div class="el-equation" id="eq:one"');
+    expect(html).toContain('<a href="#eq:one"');
+    expect(html.match(/el-equation/g)).toHaveLength(1);
+  });
+
   it('leaves prices alone and does not mark pages without math', async () => {
     const { html, data } = await render('No math, just $5 and $10, or $ 3 $.', { engine });
     expect(html).toContain('No math, just $5 and $10, or $ 3 $.');
