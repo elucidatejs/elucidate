@@ -59,18 +59,17 @@ Both packages always share one version (a fixed group in `.changeset/config.json
 Nothing is published while the version is `0.0.0`. To retry a failed release, re-run the workflow
 from the Actions tab; versions already on npm are skipped.
 
-### npm setup (maintainer, once)
+### npm owners and publishing
 
-npm lets you add a trusted publisher only to a package that exists, so the first release uses a
-token and every later one uses trusted publishing, with provenance and no token.
+`astro-elucidate` and `create-elucidate` are unscoped, so they belong to maintainers' npm user
+accounts: npm lets an organization own only scoped packages. The `elucidatejs` organization is
+kept for scoped packages later.
 
-1. Create the npm organization `elucidatejs`, with two-factor authentication required.
-2. Create a granular access token that can publish new packages, with a short expiry, and add it
-   to this repository as the Actions secret `NPM_TOKEN`.
-3. Merge the "Version Packages" pull request for `0.1.0`; the release workflow publishes with the
-   token. Then give the organization's team both packages, e.g.
-   `npm access grant read-write elucidatejs:developers astro-elucidate`.
-4. On npmjs.com, open each package's settings, add a trusted publisher for GitHub Actions with
-   organization `elucidatejs`, repository `elucidate` and workflow `release.yml`, then disallow
-   tokens for publishing.
-5. Delete the `NPM_TOKEN` secret and revoke the token.
+- Keep at least two owners for each package: `npm owner add <npm-user> <package>`
+  (`npm owner ls <package>` lists them). Owners can publish and change the package's settings.
+- Releases use npm trusted publishing, with provenance and no token. In each package's settings
+  on npmjs.com, the trusted publisher is GitHub Actions with organization `elucidatejs`,
+  repository `elucidate` and workflow `release.yml`, and publishing access disallows tokens.
+- `0.1.0` was published with a token, because npm adds a trusted publisher only to a package that
+  exists. If an `NPM_TOKEN` Actions secret is set, the workflow still uses it: a granular token with
+  read and write access to all packages and a short expiry. Delete it when it is not needed.
