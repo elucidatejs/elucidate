@@ -125,6 +125,34 @@ test('the appendix lists its sections in order and ends with the citation box', 
   expect(copied).toMatch(/^@article\{lovelace2026tour,/);
 });
 
+test('appendix labels sit on the same baseline as the first line of their text', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(article);
+  const offsets = await page.locator('.el-appendix__section').evaluateAll((sections) => {
+    // A zero-size inline-block's bottom edge is the baseline of the line it starts.
+    const baseline = (element: Element) => {
+      const probe = document.createElement('span');
+      probe.style.cssText = 'display: inline-block; width: 0; height: 0';
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) =>
+          node.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP,
+      });
+      walker.nextNode()?.parentElement?.prepend(probe);
+      const y = probe.getBoundingClientRect().bottom;
+      probe.remove();
+      return y;
+    };
+    return sections.map((section) => {
+      const [label, body] = [...section.children];
+      return label && body ? Math.abs(baseline(body) - baseline(label)) : Number.NaN;
+    });
+  });
+  expect(offsets).toHaveLength(9);
+  for (const offset of offsets) expect(offset).toBeLessThan(0.5);
+});
+
 test('article pages carry scholarly and social meta tags', async ({ page }) => {
   await page.goto(article);
   const meta = (name: string) => page.locator(`meta[name="${name}"], meta[property="${name}"]`);
