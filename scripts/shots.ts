@@ -1,14 +1,15 @@
 // Saves screenshots of the starter for visual review (docs/spec.md §16). Not a test.
-// Usage: `pnpm shots` (default pages) or `pnpm shots -- /some/path/` (one page).
+// Usage: `pnpm shots` (default pages) or `pnpm shots -- research/hello-world/` (one page).
 import { execSync, spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { chromium } from '@playwright/test';
+import { base } from '../e2e/site.ts';
 
 const port = 4323;
-const origin = `http://localhost:${port}`;
+const origin = `http://localhost:${port}${base}`;
 const outDir = '.screenshots';
-// Extend as milestones add pages (articles, About, /components/, an open overlay).
-const defaultPages = ['/'];
+// Paths relative to the site's base. Extend as milestones add pages (/components/, an overlay).
+const defaultPages = ['', 'research/a-tour-of-elucidate/', 'research/hello-world/', 'about/'];
 const widths = [375, 1440];
 const themes = ['light', 'dark'] as const;
 
@@ -32,7 +33,9 @@ try {
           colorScheme: theme,
         });
         const page = await context.newPage();
-        await page.goto(new URL(path, origin).href, { waitUntil: 'networkidle' });
+        await page.goto(new URL(path.replace(/^\/+/, ''), origin).href, {
+          waitUntil: 'networkidle',
+        });
         const name = path.replace(/^\/+|\/+$/g, '').replaceAll('/', '_') || 'home';
         await page.screenshot({ path: `${outDir}/${name}-${width}-${theme}.png`, fullPage: true });
         await context.close();
