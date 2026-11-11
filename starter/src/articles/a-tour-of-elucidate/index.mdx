@@ -28,9 +28,12 @@ reviews:
 hero: { width: page, position: below }
 ---
 
-Elucidate is built for articles that explain something carefully. An article is a folder with an
-`index.mdx` file, written in Markdown with components where you need them. Everything around the
-text, from the byline to the table of contents, comes from the front matter.
+Elucidate is built for articles that explain something carefully, in the spirit of the Distill
+journal [@goh2017]. An article is a folder with an `index.mdx` file, written in Markdown with
+components where you need them. Everything around the text, from the byline to the appendix, comes
+from the front matter and the text itself.[^folder]
+
+[^folder]: The example on this page lives in `src/articles/a-tour-of-elucidate/`. Copy it to start.
 
 ## Writing an article
 
@@ -91,12 +94,21 @@ Inline `code` sits on a light surface.
 
 ### Tables
 
-| Width    | Column      | Use                                  |
-| -------- | ----------- | ------------------------------------ |
-| `text`   | 680 px      | Body text, the default for figures   |
-| `wide`   | 920 px      | Figures that need a little more room |
-| `page`   | 1200 px     | Large figures and heroes             |
-| `screen` | 100% of the window | Full-bleed visuals            |
+A Markdown table inside a `Figure` with `kind="table"` gets a number and a caption above it.
+@tbl:widths lists the widths that figures and heroes can use. Its caption holds code and a
+cross-reference, so it is written as a `slot="caption"` child instead of the `caption` attribute.
+
+<Figure id="tbl:widths" kind="table">
+  <Fragment slot="caption">Column widths, set with `width`. @fig:widths draws them to scale.</Fragment>
+
+| Width    | Column             | Use                                  |
+| -------- | ------------------ | ------------------------------------ |
+| `text`   | 680 px             | Body text, the default for figures   |
+| `wide`   | 920 px             | Figures that need a little more room |
+| `page`   | 1200 px            | Large figures and heroes             |
+| `screen` | 100% of the window | Full-bleed visuals                   |
+
+</Figure>
 
 ### Code
 
@@ -109,14 +121,55 @@ function step(w: number[], grad: number[], alpha = 0.1): number[] {
 }
 ```
 
-## Images
+## Math
 
-Markdown images are optimized at build time. Alt text is required:
+Write inline math between single dollar signs, like $\alpha_t$ or $w \in \R^n$, and display math
+between double dollar signs. A `\label{eq:…}` numbers an equation so you can refer to it:
 
-![Four nested bars labeled screen, page, wide and text, from widest to narrowest.](./figures/widths.svg)
+$$
+w^{k+1} = w^k - \alpha \nabla f(w^k) \label{eq:gd}
+$$
 
-Content defaults to the text column. Wider figures can use the `wide`, `page` or `screen` widths
-shown above.
+@eq:gd is plain gradient descent. Momentum adds a memory of past steps [@polyak1964; @sutskever2013]:
+
+$$
+z^{k+1} = \beta z^k + \nabla f(w^k), \qquad w^{k+1} = w^k - \alpha z^{k+1} \label{eq:momentum}
+$$
+
+Equations without a label, like $\norm{w}^2 = \sum_i w_i^2$, are not numbered. Math renders at
+build time with KaTeX, or with MathJax if you set `math.engine: 'mathjax'`; macros such as `\R` and
+`\norm` are defined once in `elucidate.config.ts`.
+
+## Figures
+
+Wrap an image or a component in `Figure` to give it a number, a caption and, for screen readers and
+anyone who wants it, a longer description. @fig:widths shows the four widths:
+
+<Figure
+  id="fig:widths"
+  width="wide"
+  caption="The four column widths, from the full window down to the text column."
+  description="Four nested bars. The widest is labeled screen, 100vw; then page, 1200 px; wide, 920 px; and text, 680 px, highlighted in blue."
+>
+  ![Four nested bars labeled screen, page, wide and text, from widest to narrowest.](./figures/widths.svg)
+</Figure>
+
+Content defaults to the text column. Set `width` to `wide`, `page` or `screen` for more room, or
+`margin` to place a small figure beside the text on wide screens. Cross-references such as
+@fig:widths, @tbl:widths, @eq:momentum and @sec:math become links with the right number.
+
+## Citations and footnotes
+
+Cite with the key from the article's `.bib` file in square brackets, one or several at once
+[@kingma2014]. Citations are numbered in order of first use; hover over or focus a number to see the
+reference, and follow it to the bibliography at the end.
+
+Footnotes use the usual Markdown syntax.[^1] On wide screens they appear beside the text; on
+narrower ones they open like citations. Both are listed again in the appendix, together with the
+material in @sec:derivations.
+
+[^1]: Like this one. Footnotes can contain *formatting*, links to [Distill](https://distill.pub) and
+    math such as $\beta = 0.9$.
 
 ## The hero
 
@@ -127,3 +180,20 @@ alt text with `hero: { alt: "…" }`.
 
 Set `hero.width` to `wide`, `page` or `screen`, and `hero.position` to `above` to show the visual
 before the title.
+
+<Acknowledgments>
+  We thank the Distill authors, whose articles showed what a scholarly page on the web can be.
+</Acknowledgments>
+
+<Contributions>
+  A.L. wrote the article; C.B. drew the figures.
+</Contributions>
+
+<AppendixSection title="A. Derivations" id="sec:derivations">
+  Unrolling @eq:momentum shows that momentum averages past gradients with geometrically decaying
+  weights:
+
+  $$
+  z^{k+1} = \sum_{i=0}^{k} \beta^{i} \nabla f(w^{k-i})
+  $$
+</AppendixSection>

@@ -1,6 +1,6 @@
 ---
 title: "Hello, World"
-description: "The shortest useful Elucidate article: some text and one figure."
+description: "The shortest useful Elucidate article: some text, one figure and one citation."
 date: 2026-11-10
 status: published
 category: Notes
@@ -10,7 +10,11 @@ authors:
 ---
 
 This is a minimal article. To start a new one, copy this folder or run `npm run new` with a title.
+Explaining ideas clearly pays off for everyone who reads them [@olah2017].
 
-![A smooth sine wave drawn in blue on gray axes.](./figures/wave.svg)
+<Figure id="fig:wave" caption="A sine wave, stored in the article's figures folder.">
+  ![A smooth sine wave drawn in blue on gray axes.](./figures/wave.svg)
+</Figure>
 
-The figure above is a Markdown image stored in the article's `figures/` folder.
+@fig:wave is a Markdown image inside a `Figure`, which gives it a number and a caption. The
+reference above comes from `references.bib` next to this file.
