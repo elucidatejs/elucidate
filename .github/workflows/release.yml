@@ -51,9 +51,10 @@ jobs:
           # Only for the first release: npm sets up trusted publishing for packages that exist.
           # Delete this secret once trusted publishing is configured (docs/contributing.md).
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # pnpm 12 reads tokens from its own auth.ini, which `pnpm config set` writes, not ~/.npmrc.
         run: |
           if [ -n "$NPM_TOKEN" ]; then
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+            pnpm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
