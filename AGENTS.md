@@ -67,5 +67,10 @@ and the MDX syntax (docs/spec.md §11.9). Changes there need a changeset and doc
 
 ## Adding a component or markdown plugin
 
-Arrives with M1–M3. Each needs its own file, a test fixture, a docs entry and an example on the
-component overview page.
+- Authoring component: `src/components/<Name>.astro`, exported from `components/index.ts` and
+  listed in `builtInComponents` (`markdown/auto-import.ts`), and in `blockComponents`
+  (`markdown/mdx-blocks.ts`) if it renders a block. Add `components/examples/<Name>.example.astro`
+  and a line in `showcase.ts` for `/components/`, and a section in `docs/components.md`.
+- Markdown plugin: one file in `src/markdown/`, its place in the order in `markdown/index.ts`, and
+  tests through `test/markdown-helpers.ts`.
+- `test/site.test.ts` builds `test/fixtures/site/`, a customized site, end to end.

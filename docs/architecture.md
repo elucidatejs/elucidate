@@ -22,16 +22,18 @@ the pieces fit, why each dependency exists, and where the implementation deviate
 
 | Folder | Holds |
 |---|---|
-| `index.ts` | The integration: validates settings, sets `site`/`base`, Markdown, MDX, fonts and a Vite plugin, and injects routes. |
+| `index.ts` | The integration: validates settings, sets `site`/`base`, Markdown, MDX, fonts and Vite plugins, and injects routes. |
+| `registry.ts`, `overrides.ts`, `showcase.ts` | The site's component registry, structural overrides, and the examples for `/components/` (below). |
+| `palette.ts`, `types.ts` | `astro-elucidate/palette` (the data palette for scripts) and `astro-elucidate/types` (props of the overridable components). |
 | `config.ts`, `schema/` | Zod schemas for `elucidate.config.ts` and front matter, and the `file → path` error formatter with "Did you mean" hints. |
 | `content.ts` | The `articles` collection (one folder per article; the folder name is the slug). |
-| `routes/` | Injected pages: index, article, tag, 404. |
-| `layouts/` | `Base` (head, header, footer), `Article`, `Page`. |
-| `components/` | Structural components (Header, Byline, TableOfContents, Appendix, …) and the author-facing ones exported from `astro-elucidate/components` (Figure, Acknowledgments, Contributions, AppendixSection). |
+| `routes/` | Injected pages: index, article, tag, 404, and the component overview. |
+| `layouts/` | `Base` (head, header, footer), `Article`, `Bespoke`, `Page`. |
+| `components/` | Structural components (Header, Byline, TableOfContents, Appendix, …), the author-facing ones exported from `astro-elucidate/components` (Figure, Block, Aside, Note, Button, Overlay, Acknowledgments, Contributions, AppendixSection), `blocks/` for bespoke articles, and `examples/` for the overview page. |
 | `lib/` | Plain functions the routes share: article lists and status, URLs with the base path, dates, hero lookup, citation text and BibTeX, license and repository links. |
 | `markdown/` | The remark and rehype plugins (one file each, order in `index.ts`), the BibTeX loader and reference formatter, the KaTeX/MathJax renderers, and the grayscale code theme. |
 | `styles/` | Cascade-layered CSS: tokens, base, layout grid, chrome, components, article, contents, figures, scholarly text (equations, citations, sidenotes, cards) and the appendix. |
-| `client/` | Client scripts, bundled by Astro: theme toggle, contents scroll-spy, citation and footnote cards, copy buttons. |
+| `client/` | Client scripts, bundled by Astro: theme toggle, contents scroll-spy, citation and footnote cards, copy buttons, overlays; `index.ts` is `astro-elucidate/client`. |
 
 The integration hands the validated config and the optional `src/styles/theme.css` to the engine
 through virtual modules, `virtual:elucidate/config` and `virtual:elucidate/user-styles`, plus
@@ -40,6 +42,23 @@ fonts Vite emits, or MathJax's inline CSS); the article layout includes it only 
 math. The
 user stylesheet is imported after the engine CSS and has no layer, so it wins without `!important`.
 Heroes are found with `import.meta.glob` over `src/articles/*/Hero.astro` and `hero.*` images.
+
+### Components, overrides and the bespoke layout (M3)
+
+- **Registry.** At setup the integration reads `src/components/index.ts` as text and collects its
+  export names (Elucidate needs them before Vite runs, to know what MDX may auto-import). The
+  file is watched, so a change restarts the dev server. `virtual:elucidate/user-components`
+  re-exports it, and the auto-import plugin imports used names from there.
+- **Overrides.** A Vite `resolveId` hook sends imports of an overridden component to the site's
+  file, but only when the import comes from inside the engine. Layouts and bespoke blocks need no
+  changes, and a site's wrapper can still import the original by its package path.
+- **Bespoke layout.** The article route stores the article, plugin data, hero and URL in
+  `Astro.locals.elucidate` and passes the blocks (`ArticleTitle`, `Byline`, …) to the MDX content
+  as its `components`. Each block reads the article from `Astro.locals` and renders the
+  (overridable) structural component.
+- **Overview page.** `virtual:elucidate/showcase` imports the engine's
+  `components/examples/*.example.astro` and the site's `src/components/<Name>.example.mdx` files,
+  with their sources as strings.
 
 ## Dependencies
 
@@ -104,7 +123,18 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 | Display equations | Rendered in `div.el-equation` with `tabindex="0"` | Long equations scroll sideways on phones, and axe requires scrollable regions to be reachable by keyboard; Astro's code blocks do the same. |
 | `figures-images` plugin: alt, lazy loading, intrinsic sizes (§6.3) | `images.ts` warns on empty alt and sets `loading`/`decoding`; sizes come from Astro's image pipeline | Astro already writes `width`/`height` for local images, which it processes after the rehype plugins. |
 | `PluginData.references` (§6.4) | Each reference also has `meta`, the content of its `citation_reference` tag | The head needs it and only the bibliography plugin knows the fields. |
-| Auto-import of the user component registry (§6.3) | Only the built-in components (`Figure`, `Acknowledgments`, `Contributions`, `AppendixSection`) | The registry arrives with the component showcase in a later milestone; the plugin takes a list, so it extends without changes. |
+| Auto-import of the user component registry (§6.3) | The registry's export names are read from the file's text | The names are needed before Vite runs. `export * from` cannot be read this way, so it is an error with a fix-it; lowercase names are an error because MDX treats them as HTML. |
+| `layout` front matter (§7.1) | `layout: article` and `layout: bespoke` are removed from the front matter MDX sees | MDX treats any `layout` as a component to import. The collection keeps the field, and the route reads it there. |
+| `header: false` (§9.4) | A front-matter field `header` (default `true`), used by bespoke articles | §9.4 names it but §7.1 does not list it. |
+| Bespoke layout (§9.4) | No footer either; content is not wrapped in the prose grid | §9.4 lists only Head, Header and the content. Authors can use `<div class="el-prose el-grid">` for Elucidate's typography. |
+| `client/overlay.ts` behavior (§8.6) | Opening pushes a history entry, so Back closes the overlay; links to `#id` open it; `dismissible={false}` keeps Esc working | A hash that opens a view should behave like navigation; Esc stays for keyboard users (WCAG 2.1.2). |
+| `palette.ts` in `src/` (§4.1) | Also `types.ts` there, and `client/index.ts` for `astro-elucidate/client` | Each public export has one file. |
+| Figure `fallback` (§8.3) | Rendered with empty `alt` | It is shown only in print and without JavaScript, next to the caption and the description, which say what it shows. |
+| Margin figures (`width="margin"`) | A zero-height box in the text column whose parts hang into the margin | Grid items cannot float; the M2 float rule had no effect. `Aside` uses the same technique. |
+| Single-line block components | `<Aside>…</Aside>` on one line is lifted out of its paragraph (`markdown/mdx-blocks.ts`) | MDX parses it as inline content of a `<p>`, which browsers split around the block. |
+| Data palette values (§12.4) | Okabe–Ito hues re-stepped per mode and reordered (blue, orange, green, violet, vermillion, sky blue, olive, pink); yellow and black are replaced by olive and violet | Pure Okabe–Ito yellow and sky blue fall below 3:1 on white and black is the text color. Values were checked with a palette validator for contrast and simulated protanopia and deuteranopia; see `docs/design.md`. |
+| Showcase in e2e (§10.5) | The component overview is tested on the dev server (a second Playwright project) | With `showcase: 'dev'`, the production build has no `/components/` page. |
+| §12.6 conformance fixed in M3 | Appendix band on `--el-surface` at full width, "Cite this article", COPY/COPIED text controls with a live region, citation card on the surface color at 360px without a shadow | M2 had drifted from §12.6 on these points. |
 | Popovers (§8.4, §9) | One shared card, `#el-hovercard`, placed inside `<main>` | Fewer elements than one popover per citation; inside the main landmark so axe's "region" rule passes and screen reader users find it with the content. |
 | All engine CSS in cascade layers (§6.5) | Two math rules in `scholarly.css` are unlayered: the equation margin and the phone position of KaTeX's equation number | KaTeX's and MathJax's own CSS is unlayered and would win over any layer. User CSS loads later, so it still wins at the same specificity. |
 | Styles and components (§6.5) | Also `figure.css`, `scholarly.css` and `appendix.css`, and components `Appendix`, `ArticleMeta`, `MathStyles`, `HoverCards` | One concern per file, as above. |
