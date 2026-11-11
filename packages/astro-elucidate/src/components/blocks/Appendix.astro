@@ -1,0 +1,8 @@
+---
+import Appendix from '../Appendix.astro';
+import { articleContext } from './context.ts';
+
+const { article, plugin, url } = articleContext(Astro.locals, 'Appendix');
+---
+
+<Appendix article={article} plugin={plugin} url={url} />

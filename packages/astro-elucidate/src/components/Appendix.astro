@@ -1,18 +1,12 @@
 ---
 import config from 'virtual:elucidate/config';
 import { licenseInfo, repositoryLinks } from '../lib/appendix.ts';
-import type { Article } from '../lib/articles.ts';
 import { bibtex, citationText } from '../lib/citation.ts';
 import { formatDay, isoDay } from '../lib/format.ts';
-import type { PluginData } from '../markdown/shared.ts';
+import type { AppendixProps } from '../types.ts';
 import AppendixSection from './AppendixSection.astro';
 
-export interface Props {
-  article: Article;
-  plugin: PluginData;
-  /** The article's canonical URL. */
-  url: string;
-}
+export type Props = AppendixProps;
 
 const { article, plugin, url } = Astro.props;
 const { data } = article;

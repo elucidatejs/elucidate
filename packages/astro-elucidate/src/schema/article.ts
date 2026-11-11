@@ -61,6 +61,8 @@ export const articleSchema = strictObject({
   }).prefault({}),
   toc: z.boolean().default(true),
   layout: z.enum(['article', 'bespoke']).default('article'),
+  /** layout: bespoke only: false leaves out the site header too. */
+  header: z.boolean().default(true),
   bibliography: z.string().optional(),
 }).superRefine((data, ctx) => {
   const keys = Object.keys(data.affiliations);

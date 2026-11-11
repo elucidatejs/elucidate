@@ -1,0 +1,11 @@
+---
+import '../styles/blocks.css';
+
+export interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<aside class:list={['el-aside', className]}><div class="el-aside__body"><slot /></div></aside>

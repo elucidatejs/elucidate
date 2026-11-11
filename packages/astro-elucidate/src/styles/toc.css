@@ -68,6 +68,12 @@
     content: "−";
   }
 
+  /* In a bespoke article, <TableOfContents /> is the disclosure at every width. */
+  .el-toc-block > .el-toc--disclosure {
+    display: block;
+    margin-block-start: 0;
+  }
+
   .el-toc--float {
     display: none;
     grid-column: auto;

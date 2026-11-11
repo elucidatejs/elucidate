@@ -1,0 +1,75 @@
+---
+import { Code } from 'astro:components';
+import { builtIn, user } from 'virtual:elucidate/showcase';
+import Page from '../layouts/Page.astro';
+import { shikiConfig } from '../markdown/code-theme.ts';
+import '../styles/showcase.css';
+
+// The component overview (docs/spec.md §10.5): every built-in authoring component and every
+// component in the site's registry, each with an example and its source.
+const docs = 'https://github.com/elucidatejs/elucidate/blob/main/docs/components.md';
+const anchor = (name: string) => name.toLowerCase();
+---
+
+<Page
+  title="Components"
+  description="Everything you can use in an article without an import: rendered, with its source."
+  noindex
+>
+  <nav class="el-showcase__nav el-width-wide" aria-label="Components">
+    <ul>
+      {builtIn.map((c) => <li><a href={`#${anchor(c.name)}`}>{c.name}</a></li>)}
+      {user.map((c) => <li><a href={`#${anchor(c.name)}`}>{c.name}</a></li>)}
+    </ul>
+  </nav>
+  {
+    builtIn.map(({ name, description, Example, source }) => (
+      <section class="el-showcase el-grid" id={anchor(name)} aria-labelledby={`${anchor(name)}-name`}>
+        <header class="el-showcase__header">
+          <h2 id={`${anchor(name)}-name`}>{name}</h2>
+          <p>
+            {description}{' '}
+            <a class="el-showcase__docs" href={`${docs}#${anchor(name)}`}>Documentation</a>
+          </p>
+        </header>
+        <div class="el-showcase__example el-grid">
+          <Example />
+        </div>
+        <details class="el-showcase__source">
+          <summary class="el-label">Source</summary>
+          <Code code={source} lang="mdx" themes={shikiConfig.themes} defaultColor={false} />
+        </details>
+      </section>
+    ))
+  }
+  {
+    user.length > 0 && (
+      <h2 class="el-showcase__group">Your components</h2>
+    )
+  }
+  {
+    user.map(({ name, Example, source }) => (
+      <section class="el-showcase el-grid" id={anchor(name)} aria-labelledby={`${anchor(name)}-name`}>
+        <header class="el-showcase__header">
+          <h2 id={`${anchor(name)}-name`}>{name}</h2>
+          {!Example && (
+            <p>
+              No example yet. Add <code>src/components/{name}.example.mdx</code> to show one here.
+            </p>
+          )}
+        </header>
+        {Example && (
+          <div class="el-showcase__example el-grid">
+            <Example />
+          </div>
+        )}
+        {source && (
+          <details class="el-showcase__source">
+            <summary class="el-label">Source</summary>
+            <Code code={source} lang="mdx" themes={shikiConfig.themes} defaultColor={false} />
+          </details>
+        )}
+      </section>
+    ))
+  }
+</Page>

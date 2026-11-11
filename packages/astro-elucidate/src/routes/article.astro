@@ -1,6 +1,8 @@
 ---
 import { render } from 'astro:content';
+import { blocks } from '../components/blocks/index.ts';
 import ArticleLayout from '../layouts/Article.astro';
+import BespokeLayout from '../layouts/Bespoke.astro';
 import { builtArticles } from '../lib/articles.ts';
 import { heroFor } from '../lib/heroes.ts';
 import type { PluginData } from '../markdown/shared.ts';
@@ -27,8 +29,22 @@ if (hero?.image && !article.data.hero.alt) {
     `${hero.file} needs alt text.\n  Fix: add hero: { alt: "…" } to the front matter of src/articles/${article.id}/index.mdx.`,
   );
 }
+const bespoke = article.data.layout === 'bespoke';
+if (bespoke) {
+  // The blocks of a bespoke article (<Byline />, <Appendix />, …) read the article from here.
+  const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+  (Astro.locals as Record<string, unknown>).elucidate = { article, plugin, hero, url };
+}
 ---
 
-<ArticleLayout article={article} plugin={plugin} hero={hero}>
-  <Content />
-</ArticleLayout>
+{
+  bespoke ? (
+    <BespokeLayout article={article} plugin={plugin} hero={hero}>
+      <Content components={blocks} />
+    </BespokeLayout>
+  ) : (
+    <ArticleLayout article={article} plugin={plugin} hero={hero}>
+      <Content />
+    </ArticleLayout>
+  )
+}

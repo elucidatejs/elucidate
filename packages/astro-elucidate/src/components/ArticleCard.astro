@@ -1,14 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 import config from 'virtual:elucidate/config';
-import type { Article } from '../lib/articles.ts';
 import { formatMonth, isoDay } from '../lib/format.ts';
 import { heroFor } from '../lib/heroes.ts';
 import { articlePath } from '../lib/paths.ts';
+import type { ArticleCardProps } from '../types.ts';
 
-export interface Props {
-  article: Article;
-}
+export type Props = ArticleCardProps;
 
 const { article } = Astro.props;
 const { data } = article;

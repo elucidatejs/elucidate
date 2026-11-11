@@ -62,6 +62,40 @@
     --el-z-toc: 5;
     --el-z-popover: 20;
 
+    /* Data palette, for figures only (docs/design.md). Categorical: Okabe–Ito hues, tuned per
+       mode so each color has 3:1 contrast on the page and neighbors stay apart with color-vision
+       deficiencies. Use them in order. Sequential: one blue ramp from faint to strong. Diverging:
+       blue and orange arms around a gray midpoint at --el-div-4. In dark mode faint is dark. */
+    --el-data-1: light-dark(#0571b0, #2c8acc);
+    --el-data-2: light-dark(#b97f02, #c18503);
+    --el-data-3: light-dark(#009e73, #23ab7f);
+    --el-data-4: light-dark(#7b5cc4, #9274de);
+    --el-data-5: light-dark(#d45e05, #e36a1c);
+    --el-data-6: light-dark(#3596ca, #3c9cd0);
+    --el-data-7: light-dark(#999008, #a09600);
+    --el-data-8: light-dark(#bf6d9b, #c673a1);
+    --el-seq-0: light-dark(#87bce9, #1e4e72);
+    --el-seq-1: light-dark(#6aa9db, #23608d);
+    --el-seq-2: light-dark(#4c95ce, #2973a8);
+    --el-seq-3: light-dark(#2882c0, #2f86c4);
+    --el-seq-4: light-dark(#026ead, #359ae1);
+    --el-seq-5: light-dark(#005c91, #5badec);
+    --el-seq-6: light-dark(#024975, #7cc0f8);
+    --el-seq-7: light-dark(#00385b, #9fd3ff);
+    --el-seq-8: light-dark(#002843, #c8e5fe);
+    --el-div-0: light-dark(#024167, #c2e3ff);
+    --el-div-1: light-dark(#286898, #76b1e2);
+    --el-div-2: light-dark(#6791b4, #587f9f);
+    --el-div-3: light-dark(#a1b9ce, #3a5062);
+    --el-div-4: light-dark(#e4e4e4, #353535);
+    --el-div-5: light-dark(#cbb09e, #5f4738);
+    --el-div-6: light-dark(#b1805f, #9c6f50);
+    --el-div-7: light-dark(#934f15, #df9867);
+    --el-div-8: light-dark(#5f2e01, #fed4b9);
+    /* Chart chrome: axes and gridlines, and the text of labels and ticks. */
+    --el-data-grid: var(--el-border);
+    --el-data-label: var(--el-text-muted);
+
     /* Faint grid behind the page top; set to none to disable. */
     --el-motif-grid:
       linear-gradient(to right, var(--el-border) 1px, transparent 1px) 0 0 / 24px 24px,

@@ -13,3 +13,13 @@ declare module 'virtual:elucidate/math-styles' {
   const styles: { href?: string; css?: string };
   export default styles;
 }
+
+/** The site's own components, from src/components/index.ts (empty when it has none). */
+declare module 'virtual:elucidate/user-components' {}
+
+/** Examples for the component overview page, /components/. */
+declare module 'virtual:elucidate/showcase' {
+  type Component = (props: Record<string, unknown>) => unknown;
+  export const builtIn: { name: string; description: string; Example: Component; source: string }[];
+  export const user: { name: string; Example?: Component; source?: string }[];
+}

@@ -2,18 +2,18 @@
 // available; without JavaScript the text can still be selected. A click turns COPY into COPIED for
 // two seconds, and a polite live region says the same to screen readers.
 
-let status: HTMLElement | undefined;
+let liveRegion: HTMLElement | undefined;
 
 function announce(message: string): void {
-  if (!status) {
-    status = document.createElement('span');
-    status.className = 'el-visually-hidden';
-    status.setAttribute('role', 'status');
-    (document.querySelector('main') ?? document.body).append(status);
+  if (!liveRegion) {
+    liveRegion = document.createElement('span');
+    liveRegion.className = 'el-visually-hidden';
+    liveRegion.setAttribute('role', 'status');
+    (document.querySelector('main') ?? document.body).append(liveRegion);
   }
   // Clear first so that the same message twice is still announced.
-  status.textContent = '';
-  const region = status;
+  liveRegion.textContent = '';
+  const region = liveRegion;
   requestAnimationFrame(() => {
     region.textContent = message;
   });

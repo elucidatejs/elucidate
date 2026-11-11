@@ -1,0 +1,40 @@
+---
+import '../styles/article.css';
+import '../styles/scholarly.css';
+import { getImage } from 'astro:assets';
+import ArticleMeta from '../components/ArticleMeta.astro';
+import HoverCards from '../components/HoverCards.astro';
+import MathStyles from '../components/MathStyles.astro';
+import type { Article, Hero, PluginData } from '../types.ts';
+import Base from './Base.astro';
+
+export interface Props {
+  article: Article;
+  plugin: PluginData;
+  hero?: Hero | undefined;
+}
+
+/* layout: bespoke (docs/spec.md §9.4): the head, the site header unless `header: false`, and the
+   content. The article composes the rest from blocks such as <ArticleTitle /> and <Appendix />. */
+const { article, plugin, hero } = Astro.props;
+const { data } = article;
+const url = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const image =
+  hero?.image &&
+  new URL((await getImage({ src: hero.image, width: 1200, format: 'png' })).src, url).href;
+---
+
+<Base
+  title={data.title}
+  description={data.description}
+  noindex={data.status === 'review'}
+  ogType="article"
+  image={image}
+  header={data.header}
+  footer={false}
+>
+  <ArticleMeta slot="head" article={article} plugin={plugin} url={url} />
+  {plugin.hasMath && <MathStyles slot="head" />}
+  <article class="el-article el-bespoke"><slot /></article>
+  {(plugin.references.length > 0 || plugin.footnotes.length > 0) && <HoverCards />}
+</Base>

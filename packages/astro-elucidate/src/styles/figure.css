@@ -56,6 +56,24 @@
     margin-block-start: var(--el-space-2);
   }
 
+  /* An interactive figure's static image: shown in print and when scripting is off. */
+  .el-figure__fallback {
+    display: none;
+  }
+  .el-figure__fallback img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  @media print, (scripting: none) {
+    .el-figure--fallback > .el-figure__content {
+      display: none;
+    }
+    .el-figure--fallback > .el-figure__fallback {
+      display: block;
+    }
+  }
+
   /* Wide figures run edge to edge on phones; their captions keep the side padding. */
   @media (max-width: 639px) {
     .el-figure:is(.el-width-wide, .el-width-page, .el-width-screen) .el-figure__caption {
@@ -63,13 +81,25 @@
     }
   }
 
-  /* width="margin": beside the text on wide screens, in the text column otherwise. */
+  /* width="margin": beside the text on wide screens, in the text column otherwise. Grid items
+     cannot float, so the figure is a zero-height box in the text column and its parts hang into
+     the right margin, level with the text that follows. */
   @media (min-width: 1280px) {
-    .el-width-margin.el-figure {
-      float: right;
-      clear: right;
-      width: var(--el-width-margin);
-      margin: 0 calc(-1 * var(--el-width-margin) - var(--el-space-5)) var(--el-space-4) 0;
+    .el-grid > .el-width-margin.el-figure {
+      --el-margin-room: calc(
+        (min(var(--el-width-page), 100vw - 2 * var(--el-gutter)) - var(--el-width-text)) /
+        2 -
+        var(--el-space-5)
+      );
+      height: 0;
+      margin-block: 0;
+    }
+    .el-grid > .el-width-margin.el-figure > * {
+      width: min(var(--el-width-margin), var(--el-margin-room));
+      margin-inline-start: calc(100% + var(--el-space-5));
+    }
+    .el-grid > .el-width-margin.el-figure > :first-child {
+      margin-block-start: calc(var(--el-text-body) + 0.3em);
     }
   }
 }

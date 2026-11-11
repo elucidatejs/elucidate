@@ -1,0 +1,17 @@
+---
+import '../../styles/article.css';
+import ArticleHero from '../ArticleHero.astro';
+import { articleContext } from './context.ts';
+
+const { article, hero } = articleContext(Astro.locals, 'ArticleTitle');
+const banner = {
+  draft: 'Draft: visible in development only, not built for production.',
+  review: 'In review: not listed or indexed. Share this link with reviewers.',
+  published: undefined,
+}[article.data.status];
+---
+
+<header class="el-title-block el-grid">
+  {banner && <p class="el-status el-label" role="note">{banner}</p>}
+  <ArticleHero article={article} hero={hero} />
+</header>

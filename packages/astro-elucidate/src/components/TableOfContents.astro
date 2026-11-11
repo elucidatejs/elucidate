@@ -1,12 +1,8 @@
 ---
 import type { HeadingData } from '../markdown/shared.ts';
+import type { TableOfContentsProps } from '../types.ts';
 
-export interface Props {
-  /** From the numbering plugin; `number` is set when section numbering is on. */
-  headings: HeadingData[];
-  /** `disclosure` sits under the byline on narrow screens; `float` sits in the left margin. */
-  variant: 'disclosure' | 'float';
-}
+export type Props = TableOfContentsProps;
 
 // Sections (h2) get two-digit numbers, or their section number when numbering is on; subsections
 // (h3) nest one level and show a number only when numbering is on.

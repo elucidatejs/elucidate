@@ -1,0 +1,51 @@
+---
+import '../styles/blocks.css';
+import '../styles/overlay.css';
+import Button from './Button.astro';
+
+export interface Props {
+  /** Names the overlay in the URL: `#explorer` opens it. */
+  id: string;
+  /** Shown in the title bar and read out when the overlay opens. */
+  title: string;
+  /** `dialog`: centered, at most 720px wide. `drawer`: on the right. `full`: the whole window. */
+  size?: 'dialog' | 'drawer' | 'full';
+  /** Label of a button that opens the overlay, placed where the overlay is written. */
+  trigger?: string;
+  /** Whether a click on the backdrop closes the overlay. Esc always does. */
+  dismissible?: boolean;
+}
+
+const { id, title, size = 'dialog', trigger, dismissible = true } = Astro.props;
+---
+
+{
+  trigger && (
+    <p class="el-overlay-trigger">
+      <Button variant="primary" data-el-overlay-open={id} aria-haspopup="dialog" hidden>
+        {trigger}
+      </Button>
+    </p>
+  )
+}
+<dialog
+  id={id}
+  class:list={['el-overlay', `el-overlay--${size}`]}
+  aria-labelledby={`${id}-title`}
+  data-dismissible={dismissible ? '' : undefined}
+>
+  <div class="el-overlay__bar">
+    <h2 class="el-overlay__title" id={`${id}-title`}>{title}</h2>
+    <button class="el-overlay__close" type="button" aria-label="Close" data-el-overlay-close>
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.5" fill="none"
+        ></path>
+      </svg>
+    </button>
+  </div>
+  <div class="el-overlay__body"><slot /></div>
+</dialog>
+
+<script>
+  import '../client/overlay.ts';
+</script>

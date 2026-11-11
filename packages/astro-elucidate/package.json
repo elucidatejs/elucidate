@@ -25,7 +25,10 @@
     "./layouts": "./src/layouts/index.ts",
     "./layouts/*": "./src/layouts/*",
     "./components": "./src/components/index.ts",
-    "./components/*": "./src/components/*"
+    "./components/*": "./src/components/*",
+    "./client": "./src/client/index.ts",
+    "./palette": "./src/palette.ts",
+    "./types": "./src/types.ts"
   },
   "files": [
     "src"

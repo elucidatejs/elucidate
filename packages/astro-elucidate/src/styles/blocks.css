@@ -1,0 +1,96 @@
+/* <Block>, <Aside>, <Note> and <Button> (docs/spec.md §8.1, §9.1, §12.6). */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-block > * + * {
+    margin-block-start: 1em;
+  }
+
+  /* Aside and Note: a hairline on the left, muted small text, no background. */
+  .el-aside,
+  .el-note {
+    padding-inline-start: var(--el-space-4);
+    border-inline-start: 2px solid var(--el-border);
+  }
+  .el-aside__body,
+  .el-note {
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    line-height: 1.5;
+    color: var(--el-text-muted);
+  }
+  .el-aside__body > * + *,
+  .el-note > * + * {
+    margin-block-start: 0.6em;
+  }
+  .el-note .el-note__label {
+    color: var(--el-text);
+  }
+
+  /* At 1280px and wider an aside sits in the right margin, level with the text that follows it.
+     It takes no room in the column: the aside is a zero-height anchor and its body hangs off it. */
+  @media (min-width: 1280px) {
+    .el-grid > .el-aside {
+      position: relative;
+      height: 0;
+      margin-block: 0;
+      padding: 0;
+      border: 0;
+    }
+    .el-grid > .el-aside > .el-aside__body {
+      --el-margin-room: calc(
+        (min(var(--el-width-page), 100vw - 2 * var(--el-gutter)) - var(--el-width-text)) /
+        2 -
+        var(--el-space-5)
+      );
+      position: absolute;
+      inset-block-start: calc(
+        var(--el-text-body) +
+        (var(--el-text-body) * 1.6 - var(--el-text-small) * 1.5) /
+        2
+      );
+      inset-inline-start: calc(100% + var(--el-space-5));
+      width: min(var(--el-width-margin), var(--el-margin-room));
+    }
+  }
+
+  /* Buttons are for actions that change the page, such as opening an overlay. */
+  .el-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--el-space-2);
+    min-height: 40px;
+    padding: 0 var(--el-space-5);
+    border: 1px solid var(--el-text);
+    border-radius: var(--el-radius-pill);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    font-weight: 500;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--el-duration) var(--el-ease),
+      border-color var(--el-duration) var(--el-ease);
+  }
+  .el-button--primary {
+    background: var(--el-text);
+    color: var(--el-bg);
+  }
+  .el-button--primary:hover {
+    background: color-mix(in srgb, var(--el-text) 82%, var(--el-bg));
+  }
+  .el-button--secondary {
+    border-color: var(--el-text-muted);
+    background: transparent;
+    color: var(--el-text);
+  }
+  .el-button--secondary:hover {
+    border-color: var(--el-text);
+  }
+  .el-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}

@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import '../styles/figure.css';
 
 export interface Props {
@@ -10,20 +12,51 @@ export interface Props {
   caption?: string;
   /** Long description for screen readers and anyone who wants it, behind a disclosure. */
   description?: string;
+  /** Static image shown in print and without JavaScript, in place of an interactive figure. */
+  fallback?: ImageMetadata | string;
   /** Source of a reused figure; such figures are excluded from the reuse license. */
   credit?: string;
   /** Set by the numbering plugin. */
   number?: string;
 }
 
-const { id, kind = 'figure', width = 'text', caption, description, credit, number } = Astro.props;
+const {
+  id,
+  kind = 'figure',
+  width = 'text',
+  caption,
+  description,
+  fallback,
+  credit,
+  number,
+} = Astro.props;
 const label = number && `${kind === 'table' ? 'Table' : 'Figure'} ${number}`;
 const hasCaption = Boolean(label || caption || credit || description || Astro.slots.has('caption'));
 const table = kind === 'table';
 ---
 
-<figure class:list={['el-figure', `el-width-${width}`, table && 'el-figure--table']} id={id}>
+<figure
+  class:list={[
+    'el-figure',
+    `el-width-${width}`,
+    table && 'el-figure--table',
+    fallback && 'el-figure--fallback',
+  ]}
+  id={id}
+>
   {!table && <div class="el-figure__content"><slot /></div>}
+  {
+    fallback && (
+      <div class="el-figure__fallback">
+        {/* The caption and description say what the image shows. */}
+        {typeof fallback === 'string' ? (
+          <img src={fallback} alt="" loading="lazy" decoding="async" />
+        ) : (
+          <Image src={fallback} alt="" />
+        )}
+      </div>
+    )
+  }
   {
     hasCaption && (
       <figcaption class="el-figure__caption">
