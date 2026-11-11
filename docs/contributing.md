@@ -69,7 +69,10 @@ kept for scoped packages later.
   (`npm owner ls <package>` lists them). Owners can publish and change the package's settings.
 - Releases use npm trusted publishing, with provenance and no token. In each package's settings
   on npmjs.com, the trusted publisher is GitHub Actions with organization `elucidatejs`,
-  repository `elucidate` and workflow `release.yml`, and publishing access disallows tokens.
+  repository `elucidate`, workflow `release.yml`, no environment, and the allowed action
+  `npm publish` (the workflow publishes directly; `npm dist-tag` stays off). Publishing access
+  disallows tokens. npm drops a new trusted publisher that has not published within 2 days, so
+  check that it is still there before a release.
 - `0.1.0` was published with a token, because npm adds a trusted publisher only to a package that
   exists. If an `NPM_TOKEN` Actions secret is set, the workflow still uses it: a granular token with
   read and write access to all packages and a short expiry. Delete it when it is not needed.
