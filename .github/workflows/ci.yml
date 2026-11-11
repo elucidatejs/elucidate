@@ -36,6 +36,9 @@ jobs:
         continue-on-error: true
         timeout-minutes: 3
       - run: pnpm e2e
+      # Performance budgets and Lighthouse (mobile) ≥ 95 on the example article (§13.3).
+      - run: pnpm budgets
+      - run: pnpm lighthouse
       - run: pnpm shots
       - uses: actions/upload-artifact@v7
         with:
