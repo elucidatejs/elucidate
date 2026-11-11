@@ -76,8 +76,11 @@ at 1280px and wider, the table of contents floats in the left margin.
   brackets for citations.
 - **Sidenotes**: at 1280px and wider, a footnote sits in the right margin next to its reference,
   in the small text size. Below that, footnotes and citations open as cards.
-- **Cards**: the one overlay with a shadow, on the page background with a hairline border and
-  `--el-radius-md`, at most 420px wide.
-- **Appendix**: after one hairline below the article, set in the sans face at the small size and
+- **Cards**: on the surface color with a hairline border and `--el-radius-sm`, at most 360px wide,
+  without a shadow.
+- **Appendix**: a full-width band on the surface color, set in the sans face at the small size and
   the muted color; each section has an uppercase monospace label in a left column at 1024px and
-  wider. The citation and BibTeX boxes use the surface color, with a copy button.
+  wider. The last section, "Cite this article", shows the citation and BibTeX in monospace boxes on
+  the page background.
+- **Copy controls**: the word COPY in label style, which reads COPIED for two seconds after a
+  click; screen readers hear the same through a live region.

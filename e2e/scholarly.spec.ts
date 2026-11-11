@@ -112,7 +112,7 @@ test('the appendix lists its sections in order and ends with the citation box', 
     'References',
     'Updates and corrections',
     'Reuse',
-    'Citation',
+    'Cite this article',
   ]);
   await expect(page.locator('#fn-2')).toContainText('Like this one.');
   await expect(page.locator('#fn-2 .katex')).toHaveCount(1);

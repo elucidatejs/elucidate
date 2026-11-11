@@ -2,14 +2,15 @@
 @layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
 
 @layer elucidate.components {
-  .el-appendix {
-    padding-block-end: var(--el-space-8);
-  }
+  /* The band is full width on --el-surface. Each section paints its own full-bleed background
+     (a border image that reaches past both sides), so sections written at the end of the article
+     body and generated ones form one band. Sections are spaced with padding, never margins. */
   .el-appendix__section {
     grid-column: wide;
     display: grid;
     gap: var(--el-space-2) var(--el-space-6);
     padding-block: var(--el-space-4);
+    border-image: linear-gradient(var(--el-surface) 0 0) fill 0 / 0 / 0 100vw;
     font-family: var(--el-font-sans);
     font-size: var(--el-text-small);
     line-height: 1.6;
@@ -32,12 +33,13 @@
     }
   }
 
-  /* One hairline where the band starts, whether it starts in the article body or after it. */
-  .el-appendix__section:first-child,
+  /* Where the band starts: after the last paragraph of the body, or after the body itself. */
   :not(.el-appendix__section) + .el-appendix__section {
     margin-block-start: var(--el-space-8);
-    padding-block-start: var(--el-space-6);
-    border-block-start: 1px solid var(--el-border);
+  }
+  .el-appendix__section:first-child,
+  :not(.el-appendix__section) + .el-appendix__section {
+    padding-block-start: var(--el-space-7);
   }
   .el-appendix__section + .el-appendix__section,
   .el-prose:has(> .el-appendix__section:last-child)
@@ -45,10 +47,12 @@
     > .el-appendix__section:first-child {
     margin-block-start: 0;
     padding-block-start: var(--el-space-4);
-    border-block-start: 0;
   }
   .el-prose:has(> .el-appendix__section:last-child) {
     padding-block-end: 0;
+  }
+  .el-appendix > .el-appendix__section:last-child {
+    padding-block-end: var(--el-space-8);
   }
 
   .el-appendix__section .el-appendix__heading {
@@ -95,10 +99,11 @@
   .el-copyable {
     position: relative;
   }
-  .el-appendix .el-copyable pre {
+  .el-appendix__section .el-copyable pre {
     padding: var(--el-space-4) var(--el-space-9) var(--el-space-4) var(--el-space-4);
+    border: 1px solid var(--el-border);
     border-radius: var(--el-radius-sm);
-    background: var(--el-surface);
+    background: var(--el-bg);
     color: var(--el-text);
     font-family: var(--el-font-mono);
     font-size: var(--el-text-label);
@@ -106,15 +111,16 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  /* COPY: a text control in label style; it reads COPIED for two seconds after a click. */
   .el-copy {
     position: absolute;
     inset-block-start: var(--el-space-2);
     inset-inline-end: var(--el-space-2);
     min-height: 28px;
-    padding: 0 var(--el-space-3);
-    border: 1px solid var(--el-border);
-    border-radius: var(--el-radius-pill);
-    background: var(--el-bg);
+    padding: 0 var(--el-space-2);
+    border: 0;
+    border-radius: var(--el-radius-sm);
+    background: none;
     color: var(--el-text-muted);
     font-family: var(--el-font-mono);
     font-size: var(--el-text-label);
@@ -122,11 +128,12 @@
     text-transform: uppercase;
     cursor: pointer;
   }
-  .el-copy:hover {
+  .el-copy:hover,
+  .el-copy[data-state] {
     color: var(--el-text);
   }
   @media (hover: hover) {
-    .el-prose .el-copy {
+    .el-prose .el-copy:not([data-state]) {
       opacity: 0;
       transition: opacity var(--el-duration) var(--el-ease);
     }
