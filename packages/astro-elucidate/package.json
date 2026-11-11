@@ -1,0 +1,36 @@
+{
+  "name": "astro-elucidate",
+  "version": "0.0.0",
+  "description": "Web-native scientific articles for Astro, in the spirit of Distill.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elucidatejs/elucidate.git",
+    "directory": "packages/astro-elucidate"
+  },
+  "homepage": "https://github.com/elucidatejs/elucidate#readme",
+  "keywords": [
+    "astro-integration",
+    "withastro",
+    "mdx",
+    "science",
+    "scholarly",
+    "distill"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "astro": "^7.4.0"
+  },
+  "devDependencies": {
+    "astro": "^7.4.10"
+  }
+}

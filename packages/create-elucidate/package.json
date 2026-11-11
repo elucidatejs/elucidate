@@ -1,0 +1,26 @@
+{
+  "name": "create-elucidate",
+  "version": "0.0.0",
+  "description": "Start an Elucidate publication: npm create elucidate@latest",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elucidatejs/elucidate.git",
+    "directory": "packages/create-elucidate"
+  },
+  "homepage": "https://github.com/elucidatejs/elucidate#readme",
+  "bin": {
+    "create-elucidate": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  }
+}
