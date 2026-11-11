@@ -28,7 +28,9 @@ const isMath = (node: Element) =>
 /**
  * remark-math reads `$5 and $10` as math. Pandoc's rule tells prices from math: an opening `$`
  * is followed by a non-space, a closing `$` follows a non-space and is not followed by a digit.
- * Single-dollar math that breaks the rule goes back to plain text.
+ * Single-dollar math that breaks the rule goes back to plain text. And remark-math reads
+ * `$$…$$` on one line as inline math; alone in a paragraph, it becomes a display equation, as in
+ * Pandoc and on GitHub.
  */
 export function remarkDollarSigns() {
   return (tree: MdastRoot, file: VFile) => {
@@ -42,6 +44,27 @@ export function remarkDollarSigns() {
       if (/^\$\s|\s\$$/.test(raw) || /\d/.test(source[end] ?? '')) {
         parent.children[index] = { type: 'text', value: raw };
       }
+    });
+    visit(tree, 'paragraph', (node, index, parent) => {
+      const [only, ...rest] = node.children.filter((c) => c.type !== 'text' || c.value.trim());
+      const start = only?.position?.start.offset;
+      if (!parent || index === undefined || rest.length > 0 || only?.type !== 'inlineMath') return;
+      if (start === undefined || !source.startsWith('$$', start)) return;
+      const { value } = only;
+      // The node remark-math makes for a `$$` block.
+      const code: Element = {
+        type: 'element',
+        tagName: 'code',
+        properties: { className: ['language-math', 'math-display'] },
+        children: [{ type: 'text', value }],
+      };
+      parent.children[index] = {
+        type: 'math',
+        value,
+        position: node.position,
+        data: { hName: 'pre', hChildren: [code] },
+      };
+      return SKIP;
     });
   };
 }

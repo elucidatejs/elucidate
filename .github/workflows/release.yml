@@ -1,0 +1,61 @@
+name: Release
+
+# Publishes astro-elucidate and create-elucidate when main carries a version that npm does not
+# have yet, then tags the repository `<package>@<version>` (create-elucidate downloads the starter
+# from its tag). Versions come from a "Version Packages" pull request made with
+# `pnpm changeset version` (docs/contributing.md#releasing); nothing is published at 0.0.0.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    if: github.repository == 'elucidatejs/elucidate'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: read
+        run: echo "version=$(node -p "require('./packages/astro-elucidate/package.json').version")" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: version
+    if: needs.version.outputs.version != '0.0.0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # push the release tags
+      id-token: write # npm trusted publishing, with provenance
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-tags: true
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter create-elucidate build
+      # `changeset publish` skips versions already on npm and tags what it publishes.
+      - env:
+          # Only for the first release: npm sets up trusted publishing for packages that exist.
+          # Delete this secret once trusted publishing is configured (docs/contributing.md).
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          pnpm changeset publish
+          git push origin --tags

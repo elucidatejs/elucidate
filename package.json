@@ -13,6 +13,8 @@
     "e2e": "playwright test",
     "shots": "node scripts/shots.ts",
     "smoke": "node scripts/smoke.ts",
+    "budgets": "node scripts/budgets.ts",
+    "lighthouse": "node scripts/lighthouse.ts",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "pnpm -r typecheck && pnpm --filter elucidate-starter check",

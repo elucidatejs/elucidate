@@ -3,7 +3,7 @@
 Source of truth for scope and decisions: [docs/spec.md](docs/spec.md). Read it before changing anything.
 
 Elucidate is an Astro integration plus a starter site for publishing web-native scientific
-articles. This file is a stub during v0.1; it becomes final in milestone M5.
+articles in the spirit of Distill. docs/contributing.md has the checks and the release steps.
 
 ## Repo map
 
@@ -18,8 +18,8 @@ packages/astro-elucidate/   the engine: Astro integration (ships TypeScript sour
 packages/create-elucidate/  `npm create elucidate` (compiled to dist/ with tsc)
 starter/                    the site template = demo site = e2e target (example articles in src/articles/)
 e2e/                        Playwright + axe tests against the built starter
-scripts/shots.ts            screenshot script for visual review (not a test)
-scripts/smoke.ts            create → npm install → new → check → build under a base path, packed
+scripts/                    shots, smoke (a new site from the packed packages), budgets, lighthouse
+.github/workflows/          ci.yml (checks, demo deploy), release.yml (npm publish and tags)
 docs/                       spec.md, architecture.md (deviations live there), topic docs
 ```
 
@@ -33,6 +33,8 @@ pnpm typecheck    # astro check for the engine, elucidate check for the starter,
 pnpm test         # Vitest unit tests
 pnpm build        # builds create-elucidate and the starter
 pnpm e2e          # Playwright + axe; run pnpm build first
+pnpm budgets      # JS, CSS and font budgets of the example article; after pnpm build
+pnpm lighthouse   # Lighthouse (mobile) ≥ 95 on the example article; after pnpm build
 pnpm shots        # screenshots at 375/1440 px, light/dark, into .screenshots/
 pnpm smoke        # a new site from the packed packages, end to end (needs the npm registry)
 ```
@@ -41,9 +43,8 @@ First Playwright run on a new machine: `pnpm exec playwright install chromium`.
 
 ## Working rules
 
-- One branch and one pull request per milestone (docs/spec.md §18).
-- PR description: what changed (≤ 10 bullets), the milestone's "Done when" checklist, deviations,
-  screenshots for visual changes.
+- One branch and one pull request per change (per milestone during v0.1, docs/spec.md §18).
+- PR description: what changed (≤ 10 bullets), deviations, screenshots for visual changes.
 - Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 - Add a changeset (`pnpm changeset`) when a published package's public API or behavior changes.
 - Done means: CI green, new behavior tested, affected docs updated, budgets met.

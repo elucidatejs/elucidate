@@ -94,6 +94,11 @@ Inline `code` sits on a light surface.
 - Numbered lists for steps.
 - Both can contain **strong** and *emphasized* text.
 
+GitHub's extensions work too: tables, footnotes, ~~strikethrough~~ and task lists.
+
+- [x] Write the first draft
+- [ ] Ask a colleague to read it
+
 > Quotes are set with a hairline on the left and muted text, without a background.
 
 ### Tables
@@ -158,9 +163,15 @@ anyone who wants it, a longer description. @fig:widths shows the four widths:
   ![Four nested bars labeled screen, page, wide and text, from widest to narrowest.](./figures/widths.svg)
 </Figure>
 
+<Figure id="fig:wave" width="margin" credit="the Hello, World article" caption="A sine wave.">
+  ![A smooth sine wave drawn in blue on gray axes.](../hello-world/figures/wave.svg)
+</Figure>
+
 Content defaults to the text column. Set `width` to `wide`, `page` or `screen` for more room, or
-`margin` to place a small figure beside the text on wide screens. Cross-references such as
-@fig:widths, @tbl:widths, @eq:momentum and @sec:math become links with the right number.
+`margin` to place a small figure beside the text on wide screens, like @fig:wave. A figure taken
+from another work names it with `credit`, and the appendix leaves it out of the reuse license.
+Cross-references such as @fig:widths, @tbl:widths, @eq:momentum and @sec:math become links with
+the right number.
 
 ### Interactive figures
 

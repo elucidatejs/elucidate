@@ -120,3 +120,12 @@ at 1280px and wider, the table of contents floats in the left margin.
   with a close button sits on top.
 - **Copy controls**: the word COPY in label style, which reads COPIED for two seconds after a
   click; screen readers hear the same through a live region.
+
+## Print
+
+Printed articles use one light column on A4 or Letter, whatever the screen theme: every width
+collapses into the text column, a margin figure stays small, and the type is set in points. The
+header, footer, contents, sidenotes (the appendix lists the footnotes), buttons and tags are left
+out; an interactive figure prints its `fallback` image, and a reference whose link is not its DOI
+prints the address after its title. Figures, equations, code blocks and table rows are not split
+across pages. Adjust any of it with `@media print` in `src/styles/theme.css`.

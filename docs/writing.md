@@ -86,8 +86,9 @@ subsections 1.1, 1.2, …, in the headings and in the contents.
 
 ## Math
 
-Inline math goes between single dollar signs and display math between double ones. A
-`\label{eq:…}` numbers a display equation so the text can refer to it:
+Inline math goes between single dollar signs and display math between double ones, either on
+lines of their own or alone in a paragraph (`$$ E = mc^2 $$`). A `\label{eq:…}` numbers a display
+equation so the text can refer to it:
 
 ```md
 The step size $\alpha$ controls each update:

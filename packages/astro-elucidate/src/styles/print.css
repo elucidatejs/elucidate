@@ -1,0 +1,98 @@
+/* Print (docs/spec.md §6.5): one column, light colors, no contents or controls. Sidenotes are left
+   to the appendix's footnote list, reference links print their address, and an interactive figure
+   prints its fallback image (figure.css). */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.tokens {
+  @media print {
+    /* Every named column collapses into the text column, which takes the whole page width. */
+    :root {
+      --el-gutter: 0px;
+      --el-width-text: 100vw;
+      --el-width-wide: 100vw;
+      --el-width-page: 100vw;
+      --el-text-display: 26pt;
+      --el-text-h2: 16pt;
+      --el-text-h3: 13pt;
+      --el-text-lead: 13pt;
+      --el-text-body: 11pt;
+      --el-text-ui: 10pt;
+      --el-text-small: 9pt;
+      --el-text-label: 7.5pt;
+    }
+  }
+}
+
+@layer elucidate.utilities {
+  @media print {
+    @page {
+      margin: 18mm 16mm;
+    }
+    :root {
+      color-scheme: light;
+    }
+
+    body::before,
+    .el-skip,
+    .el-header,
+    .el-footer,
+    .el-toc,
+    .el-sidenote,
+    .el-hovercard,
+    .el-copy,
+    .el-button,
+    .el-overlay-trigger,
+    .el-figure__description,
+    .el-tags {
+      display: none;
+    }
+
+    .el-title-block {
+      padding-block: 0 var(--el-space-6);
+    }
+    .el-prose {
+      padding-block-end: var(--el-space-6);
+    }
+    /* The band's background is a border image; the minifier drops `border-image: none`. */
+    .el-appendix__section {
+      border-image-source: none;
+      border-block-start: 1px solid var(--el-border);
+    }
+
+    /* A margin figure stays small in the column. */
+    .el-grid > .el-width-margin {
+      max-width: 60mm;
+    }
+
+    /* The full address after a reference's title; a DOI link already prints its DOI. */
+    .el-references a.el-ref__title[href]:not([href^="https://doi.org/"])::after {
+      content: " " attr(href);
+      font-weight: 400;
+      overflow-wrap: anywhere;
+    }
+
+    /* Long lines wrap instead of being cut off at the page edge. */
+    pre,
+    .el-equation {
+      overflow: visible;
+    }
+    pre {
+      white-space: pre-wrap;
+    }
+
+    .el-figure,
+    .el-note,
+    .el-aside,
+    .el-equation,
+    .el-card,
+    pre,
+    tr,
+    img {
+      break-inside: avoid;
+    }
+    h2,
+    h3 {
+      break-after: avoid;
+    }
+  }
+}
