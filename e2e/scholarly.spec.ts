@@ -63,6 +63,32 @@ test('a citation card opens on keyboard focus and closes with Escape', async ({ 
   await expect(link).not.toHaveAttribute('aria-describedby');
 });
 
+test('a citation card sets the title on its own lines, no further from the top than the side', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto(article);
+  // Polyak's title wraps onto two lines in the card.
+  await page.locator('.el-prose .el-cite__ref').nth(1).hover();
+  const { top, side, lineHeight, fontSize, lines } = await page
+    .locator(`${card} .el-ref__title`)
+    .evaluate((title) => {
+      const box = title.getBoundingClientRect();
+      const outer = (title.parentElement as HTMLElement).getBoundingClientRect();
+      const style = getComputedStyle(title);
+      return {
+        top: box.top - outer.top,
+        side: box.left - outer.left,
+        lineHeight: Number.parseFloat(style.lineHeight),
+        fontSize: Number.parseFloat(style.fontSize),
+        lines: Math.round(box.height / Number.parseFloat(style.lineHeight)),
+      };
+    });
+  expect(lines).toBe(2);
+  expect(lineHeight / fontSize).toBeLessThanOrEqual(1.4);
+  expect(top).toBeLessThanOrEqual(side);
+});
+
 test.describe('on a touch screen', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 800 } });
 
