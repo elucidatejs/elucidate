@@ -83,6 +83,7 @@ Starter: `astro`, `astro-elucidate`, plus `@astrojs/check` and `typescript` for 
 | Features by milestone (§18) | The config and front-matter schemas accept every v0.1 field now; fields for later milestones are validated but unused | Sites written today keep working as features land. The docs say which fields take effect later. |
 | `home: 'page'` in M4 (§18) | Route switch and both collision errors in M1 | They fall out of the §20 #6 check; the `ArticleList` component for page mode still comes in M4. |
 | `release.yml` (§4.1) | Deferred to M5 | Nothing is published before M5. |
+| Changesets opens the "Version Packages" PR from Actions (§16, §21) | `release.yml` will only publish (`changeset publish` skips versions already on npm); the version bump is a normal PR made with `pnpm changeset version` | The repository setting "Allow GitHub Actions to create and approve pull requests" stays off, so no workflow can open or approve pull requests. |
 | Issue and PR templates (§18 M0) | Not added | They belong in the org-level `elucidatejs/.github` repo (§4.0). |
 
 ## Verify-at-implementation log (spec §20)
