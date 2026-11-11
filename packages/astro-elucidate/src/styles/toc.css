@@ -93,6 +93,10 @@
          It starts level with the first line: the abstract's label, or else the prose's first line
          below its top padding. */
       position: absolute;
+      /* Above the prose that follows it, which is positioned too and would take the list's
+         clicks; the column itself lets clicks through to wide content passing under it. */
+      z-index: var(--el-z-toc);
+      pointer-events: none;
       inset-block: var(--el-space-6) 0;
       inset-inline-start: max(var(--el-gutter), (100% - var(--el-width-page)) / 2);
       width: min(var(--el-width-margin), (100% - var(--el-width-text)) / 2 - 2 * var(--el-gutter));
@@ -101,6 +105,7 @@
       inset-block-start: 0;
     }
     .el-toc--float > nav {
+      pointer-events: auto;
       transition:
         opacity var(--el-duration) var(--el-ease),
         visibility var(--el-duration);

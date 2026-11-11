@@ -45,11 +45,25 @@ test('wide screens show a numbered floating contents list that follows the reade
   // It starts level with the first line of the article: the abstract's label.
   const top = async (selector: string) => (await page.locator(selector).boundingBox())?.y;
   expect(await top('.el-toc--float .el-label')).toBe(await top('.el-abstract > .el-label'));
+  // Next to the prose, the links still take mouse clicks (the prose box must not cover them).
+  await page.evaluate(() => scrollTo(0, 1200));
+  await toc.getByRole('link', { name: /Math/ }).click({ timeout: 2000 });
+  await expect(page).toHaveURL(/#math$/);
   await page.evaluate(() => document.getElementById('figures')?.scrollIntoView());
   // The list fades out while a wide figure passes under it, so look for its links even then.
   const link = (name: RegExp) => toc.getByRole('link', { name, includeHidden: true });
   await expect(link(/Figures/)).toHaveAttribute('aria-current', 'true');
   await expect(link(/The hero/)).not.toHaveAttribute('aria-current');
+  // Wide content passing under the contents column still takes clicks there.
+  const block = page.locator('.el-prose > .el-width-page').first();
+  await block.scrollIntoViewIfNeeded();
+  const box = (await block.boundingBox()) as { y: number; height: number };
+  const column = (await toc.boundingBox()) as { x: number };
+  const hit = await page.evaluate(
+    ([x, y]) => Boolean(document.elementFromPoint(x, y)?.closest('.el-width-page')),
+    [column.x + 10, box.y + box.height / 2],
+  );
+  expect(hit).toBe(true);
 });
 
 test('phones show contents as a disclosure under the byline', async ({ page }) => {
