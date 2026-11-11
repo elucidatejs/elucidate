@@ -42,6 +42,9 @@ test('wide screens show a numbered floating contents list that follows the reade
   await expect(toc).toBeVisible();
   await expect(page.locator('.el-toc--disclosure')).toBeHidden();
   await expect(toc.locator('.el-toc__number').first()).toHaveText('01');
+  // It starts level with the first line of the article: the abstract's label.
+  const top = async (selector: string) => (await page.locator(selector).boundingBox())?.y;
+  expect(await top('.el-toc--float .el-label')).toBe(await top('.el-abstract > .el-label'));
   await page.evaluate(() => document.getElementById('figures')?.scrollIntoView());
   // The list fades out while a wide figure passes under it, so look for its links even then.
   const link = (name: RegExp) => toc.getByRole('link', { name, includeHidden: true });

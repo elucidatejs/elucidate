@@ -95,6 +95,11 @@
     margin-block-start: 1em;
   }
 
+  /* The abstract and the prose, which the floating contents span. */
+  .el-article__body {
+    position: relative;
+  }
+
   /* Prose: article and page bodies. */
   .el-prose {
     position: relative;
@@ -119,9 +124,6 @@
   }
   .el-prose :where(h2, h3) + * {
     margin-block-start: 0.6em;
-  }
-  .el-prose > .el-toc--float + * {
-    margin-block-start: 0;
   }
   .el-prose :where(ul, ol) {
     padding-inline-start: 1.4em;

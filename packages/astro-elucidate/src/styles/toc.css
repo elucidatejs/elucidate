@@ -76,7 +76,7 @@
 
   .el-toc--float {
     display: none;
-    grid-column: auto;
+    line-height: 1.6;
   }
   .el-toc--float .el-label {
     display: block;
@@ -89,12 +89,16 @@
     }
     .el-toc--float {
       display: block;
-      /* Spans the article body, so the sticky list inside follows the reader to the end; the top
-         inset matches the prose padding so it starts level with the first line. */
+      /* Spans the abstract and the prose, so the sticky list inside follows the reader to the end.
+         It starts level with the first line: the abstract's label, or else the prose's first line
+         below its top padding. */
       position: absolute;
       inset-block: var(--el-space-6) 0;
       inset-inline-start: max(var(--el-gutter), (100% - var(--el-width-page)) / 2);
       width: min(var(--el-width-margin), (100% - var(--el-width-text)) / 2 - 2 * var(--el-gutter));
+    }
+    .el-toc--float:has(+ .el-grid > .el-abstract) {
+      inset-block-start: 0;
     }
     .el-toc--float > nav {
       transition:
