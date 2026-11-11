@@ -1,19 +1,22 @@
 ---
-import type { MarkdownHeading } from 'astro';
+import type { HeadingData } from '../markdown/shared.ts';
 
 export interface Props {
-  headings: MarkdownHeading[];
+  /** From the numbering plugin; `number` is set when section numbering is on. */
+  headings: HeadingData[];
   /** `disclosure` sits under the byline on narrow screens; `float` sits in the left margin. */
   variant: 'disclosure' | 'float';
 }
 
-// Sections (h2) get two-digit numbers; subsections (h3) nest one level without numbers.
-const sections: { heading: MarkdownHeading; children: MarkdownHeading[] }[] = [];
+// Sections (h2) get two-digit numbers, or their section number when numbering is on; subsections
+// (h3) nest one level and show a number only when numbering is on.
+const sections: { heading: HeadingData; children: HeadingData[] }[] = [];
 for (const heading of Astro.props.headings) {
   if (heading.depth === 2) sections.push({ heading, children: [] });
   else if (heading.depth === 3) sections.at(-1)?.children.push(heading);
 }
-const number = (i: number) => String(i + 1).padStart(2, '0');
+const number = (heading: HeadingData, i: number) =>
+  heading.number ?? String(i + 1).padStart(2, '0');
 const float = Astro.props.variant === 'float';
 const Wrapper = float ? 'div' : 'details';
 ---
@@ -32,14 +35,17 @@ const Wrapper = float ? 'div' : 'details';
           {sections.map(({ heading, children }, i) => (
             <li>
               <a href={`#${heading.slug}`}>
-                <span class="el-toc__number">{number(i)}</span>
+                <span class="el-toc__number">{number(heading, i)}</span>
                 <span>{heading.text}</span>
               </a>
               {children.length > 0 && (
                 <ol>
                   {children.map((child) => (
                     <li>
-                      <a href={`#${child.slug}`}>{child.text}</a>
+                      <a href={`#${child.slug}`}>
+                        {child.number && <span class="el-toc__number">{child.number}</span>}
+                        <span>{child.text}</span>
+                      </a>
                     </li>
                   ))}
                 </ol>

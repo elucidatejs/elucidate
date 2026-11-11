@@ -1,0 +1,133 @@
+/* The appendix band: author-written sections at the end of the article, then generated ones. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-appendix {
+    padding-block-end: var(--el-space-8);
+  }
+  .el-appendix__section {
+    grid-column: wide;
+    display: grid;
+    gap: var(--el-space-2) var(--el-space-6);
+    padding-block: var(--el-space-4);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    line-height: 1.6;
+    color: var(--el-text-muted);
+  }
+  @media (min-width: 1024px) {
+    .el-appendix__section {
+      grid-template-columns: 180px minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 639px) {
+    .el-appendix__section {
+      grid-column: text;
+    }
+  }
+
+  /* One hairline where the band starts, whether it starts in the article body or after it. */
+  .el-appendix__section:first-child,
+  :not(.el-appendix__section) + .el-appendix__section {
+    margin-block-start: var(--el-space-8);
+    padding-block-start: var(--el-space-6);
+    border-block-start: 1px solid var(--el-border);
+  }
+  .el-appendix__section + .el-appendix__section,
+  .el-prose:has(> .el-appendix__section:last-child)
+    + .el-appendix
+    > .el-appendix__section:first-child {
+    margin-block-start: 0;
+    padding-block-start: var(--el-space-4);
+    border-block-start: 0;
+  }
+  .el-prose:has(> .el-appendix__section:last-child) {
+    padding-block-end: 0;
+  }
+
+  .el-appendix__section .el-appendix__heading {
+    margin: 0;
+    padding-block-start: 0.15em;
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--el-text);
+  }
+  .el-appendix__body > * + * {
+    margin-block-start: 0.8em;
+  }
+  .el-appendix__body :where(ul, ol) {
+    padding-inline-start: 1.2em;
+  }
+
+  .el-references {
+    list-style: none;
+    padding: 0;
+  }
+  .el-references li {
+    display: grid;
+    grid-template-columns: 2.4em minmax(0, 1fr);
+  }
+  .el-references li + li,
+  .el-footnotes li + li {
+    margin-block-start: var(--el-space-3);
+  }
+  .el-references__number {
+    font-family: var(--el-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .el-ref__title {
+    font-weight: 500;
+    color: var(--el-text);
+  }
+  .el-references :target,
+  .el-footnotes :target {
+    color: var(--el-text);
+  }
+
+  .el-copyable {
+    position: relative;
+  }
+  .el-appendix .el-copyable pre {
+    padding: var(--el-space-4) var(--el-space-9) var(--el-space-4) var(--el-space-4);
+    border-radius: var(--el-radius-sm);
+    background: var(--el-surface);
+    color: var(--el-text);
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .el-copy {
+    position: absolute;
+    inset-block-start: var(--el-space-2);
+    inset-inline-end: var(--el-space-2);
+    min-height: 28px;
+    padding: 0 var(--el-space-3);
+    border: 1px solid var(--el-border);
+    border-radius: var(--el-radius-pill);
+    background: var(--el-bg);
+    color: var(--el-text-muted);
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .el-copy:hover {
+    color: var(--el-text);
+  }
+  @media (hover: hover) {
+    .el-prose .el-copy {
+      opacity: 0;
+      transition: opacity var(--el-duration) var(--el-ease);
+    }
+    .el-prose .el-copyable:is(:hover, :focus-within) .el-copy {
+      opacity: 1;
+    }
+  }
+}

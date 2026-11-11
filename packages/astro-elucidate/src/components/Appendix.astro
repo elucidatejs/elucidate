@@ -1,0 +1,110 @@
+---
+import config from 'virtual:elucidate/config';
+import { licenseInfo, repositoryLinks } from '../lib/appendix.ts';
+import type { Article } from '../lib/articles.ts';
+import { bibtex, citationText } from '../lib/citation.ts';
+import { formatDay, isoDay } from '../lib/format.ts';
+import type { PluginData } from '../markdown/shared.ts';
+import AppendixSection from './AppendixSection.astro';
+
+export interface Props {
+  article: Article;
+  plugin: PluginData;
+  /** The article's canonical URL. */
+  url: string;
+}
+
+const { article, plugin, url } = Astro.props;
+const { data } = article;
+const license = licenseInfo(data.license ?? config.license);
+const repo = config.repository && repositoryLinks(config.repository, article.id, data.title);
+const backref = (n: number) =>
+  ` <a class="el-backref" href="#fnref-${n}" aria-label="Back to reference ${n}">↩</a>`;
+const withBackref = (html: string, n: number) =>
+  /<\/p>\s*$/.test(html) ? html.replace(/<\/p>\s*$/, `${backref(n)}</p>`) : html + backref(n);
+---
+
+<div class="el-appendix el-grid">
+  {
+    data.reviews.length > 0 && (
+      <AppendixSection title="Discussion and review">
+        <ul>
+          {data.reviews.map((r) => (
+            <li>
+              <a href={r.url}>{r.label}</a>
+            </li>
+          ))}
+        </ul>
+      </AppendixSection>
+    )
+  }
+  {
+    plugin.footnotes.length > 0 && (
+      <AppendixSection title="Footnotes">
+        <ol class="el-footnotes">
+          {plugin.footnotes.map((f) => (
+            <li id={`fn-${f.number}`} set:html={withBackref(f.html, f.number)} />
+          ))}
+        </ol>
+      </AppendixSection>
+    )
+  }
+  {
+    plugin.references.length > 0 && (
+      <AppendixSection title="References">
+        <ol class="el-references">
+          {plugin.references.map((r) => (
+            <li id={`ref-${r.key}`}>
+              <span class="el-references__number">{r.number}.</span>
+              <span class="el-references__entry" set:html={r.html} />
+            </li>
+          ))}
+        </ol>
+      </AppendixSection>
+    )
+  }
+  {
+    (repo || data.updated) && (
+      <AppendixSection title="Updates and corrections">
+        {data.updated && (
+          <p>
+            Updated <time datetime={isoDay(data.updated)}>{formatDay(data.updated)}</time>.
+          </p>
+        )}
+        {repo && (
+          <p>
+            If you see mistakes or want to suggest changes, please <a href={repo.issue}>open an issue</a>.
+            You can also <a href={repo.history}>view all changes to this article</a>.
+          </p>
+        )}
+      </AppendixSection>
+    )
+  }
+  <AppendixSection title="Reuse">
+    <p>
+      Text and figures are licensed under{' '}
+      {license.url ? <a href={license.url}>{license.name}</a> : license.name}, unless noted otherwise.
+      Figures reused from other sources are excluded; their captions say “Figure from …”.
+    </p>
+  </AppendixSection>
+  <AppendixSection title="Citation">
+    <p>For attribution in academic contexts, please cite this work as</p>
+    <div class="el-copyable">
+      <pre id="el-citation-text">{citationText(data, config.title, url)}</pre>
+      <button class="el-copy" type="button" data-copy="el-citation-text" aria-label="Copy citation" hidden>
+        Copy
+      </button>
+    </div>
+    <p>BibTeX citation</p>
+    <div class="el-copyable">
+      <pre id="el-bibtex">{bibtex(data, config.title, url)}</pre>
+      <button class="el-copy" type="button" data-copy="el-bibtex" aria-label="Copy BibTeX" hidden>
+        Copy
+      </button>
+    </div>
+  </AppendixSection>
+</div>
+
+<script>
+  import '../client/copy.ts';
+</script>

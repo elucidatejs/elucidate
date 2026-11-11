@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import ArticleLayout from '../layouts/Article.astro';
 import { builtArticles } from '../lib/articles.ts';
 import { heroFor } from '../lib/heroes.ts';
+import type { PluginData } from '../markdown/shared.ts';
 
 export async function getStaticPaths() {
   return (await builtArticles()).map((article) => ({
@@ -13,7 +14,13 @@ export async function getStaticPaths() {
 
 const { article } = Astro.props;
 // biome-ignore lint/suspicious/noExplicitAny: the entry comes straight from getCollection.
-const { Content, headings } = await render(article as any);
+const { Content, remarkPluginFrontmatter } = await render(article as any);
+const plugin: PluginData = remarkPluginFrontmatter.elucidate ?? {
+  hasMath: false,
+  headings: [],
+  references: [],
+  footnotes: [],
+};
 const hero = heroFor(article.id);
 if (hero?.image && !article.data.hero.alt) {
   throw new Error(
@@ -22,6 +29,6 @@ if (hero?.image && !article.data.hero.alt) {
 }
 ---
 
-<ArticleLayout article={article} headings={headings} hero={hero}>
+<ArticleLayout article={article} plugin={plugin} hero={hero}>
   <Content />
 </ArticleLayout>

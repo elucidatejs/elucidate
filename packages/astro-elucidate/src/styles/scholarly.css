@@ -1,0 +1,108 @@
+/* Scholarly text: section numbers, equations, cross-references, citations, sidenotes, cards. */
+@layer elucidate.reset, elucidate.tokens, elucidate.base, elucidate.components, elucidate.utilities;
+
+@layer elucidate.components {
+  .el-prose :where(h2, h3)[data-number]::before {
+    content: attr(data-number);
+    margin-inline-end: 0.6em;
+    font-family: var(--el-font-mono);
+    font-size: 0.75em;
+    font-weight: 400;
+    color: var(--el-text-muted);
+  }
+
+  .el-equation {
+    margin-block: 1.4em;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .el-xref {
+    white-space: nowrap;
+  }
+
+  .el-cite,
+  .el-fnref {
+    font-size: 0.75em;
+    line-height: 0;
+    vertical-align: 0.5em;
+    white-space: nowrap;
+    color: var(--el-text-muted);
+  }
+  .el-cite a,
+  .el-fnref a {
+    color: var(--el-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Footnotes as sidenotes in the right margin; below 1280 px they open as cards. */
+  .el-sidenote {
+    display: none;
+  }
+  .el-sidenote__number {
+    font-family: var(--el-font-mono);
+    font-size: var(--el-text-label);
+    color: var(--el-text);
+  }
+  @media (min-width: 1280px) {
+    .el-sidenote {
+      --el-margin-room: calc(
+        (min(var(--el-width-page), 100vw - 2 * var(--el-gutter)) - var(--el-width-text)) /
+        2 -
+        var(--el-space-5)
+      );
+      display: block;
+      float: right;
+      clear: right;
+      width: min(var(--el-width-margin), var(--el-margin-room));
+      margin-inline-end: calc(
+        -1 *
+        min(var(--el-width-margin), var(--el-margin-room)) -
+        var(--el-space-5)
+      );
+      margin-block: 0.3em var(--el-space-3);
+      font-family: var(--el-font-sans);
+      font-size: var(--el-text-small);
+      line-height: 1.5;
+      color: var(--el-text-muted);
+    }
+  }
+
+  /* The card shared by citations and footnotes (client/popovers.ts). */
+  .el-hovercard {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    max-width: min(420px, 100vw - 24px);
+    padding: var(--el-space-4);
+    border: 1px solid var(--el-border);
+    border-radius: var(--el-radius-md);
+    background: var(--el-bg);
+    color: var(--el-text);
+    box-shadow: var(--el-shadow-overlay);
+    font-family: var(--el-font-sans);
+    font-size: var(--el-text-small);
+    line-height: 1.5;
+  }
+  .el-hovercard > * + * {
+    margin-block-start: 0.6em;
+  }
+  .el-hovercard .el-ref__title {
+    font-weight: 500;
+  }
+}
+
+/* KaTeX's and MathJax's own CSS is unlayered, so it wins over every layer above. These overrides
+   are unlayered too; user CSS still wins at the same specificity because it loads later. */
+.el-equation > .katex-display,
+.el-equation > mjx-container[display="true"] {
+  margin: 0;
+}
+/* On phones a numbered equation can be wider than the column: the number follows the equation
+   instead of overlapping it, and the row scrolls. */
+@media (max-width: 639px) {
+  .el-equation .katex-display > .katex > .katex-html > .katex-tag {
+    position: static;
+    margin-inline-start: 1.5em;
+  }
+}

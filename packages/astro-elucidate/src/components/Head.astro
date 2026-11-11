@@ -8,9 +8,19 @@ export interface Props {
   description?: string;
   /** Adds `robots: noindex`, e.g. for articles in review. */
   noindex?: boolean;
+  /** Open Graph type. */
+  ogType?: 'website' | 'article';
+  /** Absolute URL of the social preview image (an article's image hero). */
+  image?: string | undefined;
 }
 
-const { title, description = config.description, noindex = false } = Astro.props;
+const {
+  title,
+  description = config.description,
+  noindex = false,
+  ogType = 'website',
+  image,
+} = Astro.props;
 const fullTitle = title === config.title ? title : `${title} · ${config.title}`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
 ---
@@ -22,6 +32,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url);
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex" />}
 <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+<meta property="og:site_name" content={config.title} />
+<meta property="og:title" content={title} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:url" content={canonical} />
+<meta property="og:type" content={ogType} />
+{image && <meta property="og:image" content={image} />}
+<meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
 <script is:inline>
   // Pre-paint: apply the stored or system theme before first paint to avoid a flash.
   (() => {

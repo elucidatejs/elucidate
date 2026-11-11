@@ -91,10 +91,17 @@
       width: min(var(--el-width-margin), (100% - var(--el-width-text)) / 2 - 2 * var(--el-gutter));
     }
     .el-toc--float > nav {
+      transition:
+        opacity var(--el-duration) var(--el-ease),
+        visibility var(--el-duration);
       position: sticky;
       top: var(--el-space-10);
       max-height: calc(100vh - var(--el-space-10) - var(--el-space-5));
       overflow-y: auto;
     }
+  }
+  .el-toc__nav--hidden {
+    opacity: 0;
+    visibility: hidden;
   }
 }

@@ -1,0 +1,16 @@
+---
+import '../styles/appendix.css';
+
+export interface Props {
+  title: string;
+  /** `sec:…`, for cross-references from the article. */
+  id?: string;
+}
+
+const { title, id } = Astro.props;
+---
+
+<section class="el-appendix__section" id={id}>
+  <h2 class="el-appendix__heading">{title}</h2>
+  <div class="el-appendix__body"><slot /></div>
+</section>
